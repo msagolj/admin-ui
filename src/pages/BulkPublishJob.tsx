@@ -30,18 +30,29 @@ import { useResource } from '../context/ResourceContext';
 import MethodBadge from '../components/MethodBadge';
 import { formatDate } from '../utils/dateUtils';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
+import { apiCall } from '../utils/api';
+import ResponseDisplay from '../components/ResponseDisplay';
 
 interface BulkPublishResponse {
-  jobId: string;
-  status: string;
-  message: string;
-  timestamp: string;
-  details?: {
-    paths?: string[];
-    errors?: Array<{
-      path: string;
-      error: string;
-    }>;
+  status: number;
+  messageId: string;
+  job: {
+    topic: string;
+    name: string;
+    state: string;
+    startTime: string;
+    progress: {
+      total: number;
+      processed: number;
+      failed: number;
+    };
+    data: {
+      paths: string[];
+    };
+  };
+  links: {
+    self: string;
+    list: string;
   };
 }
 
@@ -62,6 +73,13 @@ const BulkPublishJob: React.FC = () => {
   const [disableNotifications, setDisableNotifications] = useState(false);
   const [paths, setPaths] = useState<string[]>([]);
   const [newPath, setNewPath] = useState('');
+  const [requestDetails, setRequestDetails] = useState<{ 
+    url: string; 
+    method: string; 
+    headers: Record<string, string>; 
+    body: any;
+    queryParams?: Record<string, string>;
+  } | null>(null);
 
   const handleAddPath = () => {
     if (newPath && !paths.includes(newPath)) {
@@ -76,48 +94,36 @@ const BulkPublishJob: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (paths.length === 0) {
-      setError({
-        message: 'Please add at least one path to process',
-        status: 400
-      });
-      return;
-    }
-
     setLoading(true);
     setError(null);
     setStatus(null);
+    setRequestDetails(null);
 
     try {
-      const queryParams = new URLSearchParams();
-      if (forceUpdateRedirects) queryParams.append('forceUpdateRedirects', 'true');
-      if (disableNotifications) queryParams.append('disableNotifications', 'true');
+      const url = `https://admin.hlx.page/live/${owner}/${repo}/${ref}/*`;
+      const requestBody = {
+        paths: paths.filter(p => p.trim())
+      };
 
-      const response = await fetch(
-        `https://admin.hlx.page/live/${owner}/${repo}/${ref}/*${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            paths
-          }),
-        }
-      );
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
+        method: 'POST',
+        headers: token ? { 'x-auth-token': token } : {},
+        body: requestBody,
+        queryParams: {}
+      });
 
-      if (!response.ok) {
-        let errorMessage = `HTTP error! status: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-      const data = await response.json();
-      setStatus(data);
+      const response = await apiCall<BulkPublishResponse>(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      setStatus(response.data);
     } catch (err) {
       const errorDetails: ErrorDetails = {
         message: err instanceof Error ? err.message : 'An unknown error occurred',
@@ -329,119 +335,76 @@ const BulkPublishJob: React.FC = () => {
         </Alert>
       )}
 
-      {status && (
+      {(status || requestDetails) && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ButtonGroup variant="outlined">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(false)}
-                color={!showRaw ? "primary" : "inherit"}
-              >
-                Formatted
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRaw(true)}
-                color={showRaw ? "primary" : "inherit"}
-              >
-                Raw Response
-              </Button>
-            </ButtonGroup>
-          </Box>
-
-          {showRaw ? (
-            <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Raw API Response:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.875rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  m: 0,
-                  maxHeight: '600px',
-                  overflowY: 'auto',
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    background: '#f1f1f1',
-                    borderRadius: '4px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: '#888',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      background: '#666',
-                    },
-                  },
-                }}
-              >
-                {JSON.stringify(status, null, 2)}
-              </Box>
-            </Paper>
-          ) : (
-            <Card>
-              <CardContent>
+          <ResponseDisplay
+            data={status}
+            formattedContent={
+              status && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h6">Job Status</Typography>
-                    <Chip
-                      label={status.status}
-                      color={status.status === 'scheduled' ? 'success' : 'default'}
+                    <Typography variant="subtitle1">Job Details</Typography>
+                    <Chip 
+                      label={status.job.state} 
+                      color={status.job.state === 'completed' ? 'success' : status.job.state === 'failed' ? 'error' : 'primary'}
                       size="small"
                     />
                   </Box>
-                  <Typography variant="body1">{status.message}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Job ID: {status.jobId}
+                  <Typography variant="body2">
+                    <strong>Topic:</strong> {status.job.topic}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Timestamp: {formatDate(status.timestamp)}
+                  <Typography variant="body2">
+                    <strong>Name:</strong> {status.job.name}
                   </Typography>
-                  {status.details?.paths && status.details.paths.length > 0 && (
+                  <Typography variant="body2">
+                    <strong>Start Time:</strong> {formatDate(status.job.startTime)}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Progress:</strong> {status.job.progress.processed} / {status.job.progress.total} ({status.job.progress.failed} failed)
+                  </Typography>
+                  {status.job.data.paths && status.job.data.paths.length > 0 && (
                     <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Paths to Process:
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Paths:</strong>
                       </Typography>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                        {status.details.paths.map((path) => (
+                        {status.job.data.paths.map((path: string) => (
                           <Chip
                             key={path}
                             label={path}
-                            color="primary"
-                            variant="outlined"
                             size="small"
+                            variant="outlined"
                           />
                         ))}
                       </Stack>
                     </Box>
                   )}
-                  {status.details?.errors && status.details.errors.length > 0 && (
+                  {status.links && (
                     <Box>
-                      <Typography variant="subtitle2" color="error" gutterBottom>
-                        Errors:
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Links:</strong>
                       </Typography>
-                      {status.details.errors.map((error, index) => (
-                        <Alert severity="error" key={index} sx={{ mb: 1 }}>
-                          <Typography variant="body2">
-                            Path: {error.path}
-                          </Typography>
-                          <Typography variant="body2">
-                            Error: {error.error}
-                          </Typography>
-                        </Alert>
-                      ))}
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {Object.entries(status.links).map(([key, url]) => (
+                          <Chip
+                            key={key}
+                            label={`${key}: ${url}`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Stack>
                     </Box>
                   )}
                 </Box>
-              </CardContent>
-            </Card>
-          )}
+              )
+            }
+            apiUrl={`https://admin.hlx.page/publish/${owner}/${repo}/${ref}/*`}
+            method="POST"
+            headers={requestDetails?.headers}
+            queryParams={requestDetails?.queryParams}
+            body={requestDetails?.body}
+          />
         </Box>
       )}
     </Box>

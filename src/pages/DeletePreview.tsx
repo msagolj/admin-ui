@@ -18,7 +18,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Chip,
+  Stack
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -69,6 +71,7 @@ const DeletePreview: React.FC = () => {
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string> } | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,10 +83,23 @@ const DeletePreview: React.FC = () => {
     setLoading(true);
     setError(null);
     setStatus(null);
+    setRequestDetails(null);
 
     try {
-      const response = await apiCall<PreviewResponse>(`https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`, {
+      const url = `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`;
+      
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
         method: 'DELETE',
+        headers: token ? { 'x-auth-token': token } : {},
+        queryParams: {},
+      });
+
+      const response = await apiCall<PreviewResponse>(url, {
+        method: 'DELETE',
+        headers: token ? { 'x-auth-token': token } : {},
       });
       setStatus(response.data);
       setShowRaw(false);
@@ -241,47 +257,69 @@ const DeletePreview: React.FC = () => {
         </Alert>
       )}
 
-      {status && (
+      {(status || requestDetails) && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ButtonGroup variant="outlined">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(false)}
-                color={!showRaw ? "primary" : "inherit"}
-              >
-                Formatted
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRaw(true)}
-                color={showRaw ? "primary" : "inherit"}
-              >
-                Raw Response
-              </Button>
-            </ButtonGroup>
-          </Box>
-
           <ResponseDisplay
             data={status}
             formattedContent={
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {status.preview.status !== undefined && (
-                  <StatusCard
-                    title="Preview Status"
-                    status={status.preview.status}
-                    url={status.preview.url}
-                    lastModified={status.preview.lastModified}
-                    contentBusId={status.preview.contentBusId}
-                    sourceLocation={status.preview.sourceLocation}
-                    sourceLastModified={status.preview.sourceLastModified}
-                    permissions={status.preview.permissions}
-                  />
-                )}
-              </Box>
+              status && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle1">Preview Status</Typography>
+                    <Chip 
+                      label={status.preview.status === 200 ? 'success' : 'error'} 
+                      color={status.preview.status === 200 ? 'success' : 'error'}
+                      size="small"
+                    />
+                  </Box>
+                  <Typography variant="body2">
+                    <strong>Web Path:</strong> {status.webPath}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Resource Path:</strong> {status.resourcePath}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>URL:</strong> {status.preview.url}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Last Modified:</strong> {formatDate(status.preview.lastModified)}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Content Bus ID:</strong> {status.preview.contentBusId}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Source Location:</strong> {status.preview.sourceLocation}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Source Last Modified:</strong> {formatDate(status.preview.sourceLastModified)}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Permissions:</strong> {status.preview.permissions.join(', ')}
+                  </Typography>
+                  {status.links && (
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Links:</strong>
+                      </Typography>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {Object.entries(status.links).map(([key, url]) => (
+                          <Chip
+                            key={key}
+                            label={`${key}: ${url}`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+                </Box>
+              )
             }
             apiUrl={`https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`}
             method="DELETE"
+            headers={requestDetails?.headers}
+            queryParams={requestDetails?.queryParams}
           />
         </Box>
       )}

@@ -12,9 +12,11 @@ import MethodBadge from './MethodBadge';
 interface ApiUrlDisplayProps {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   url: string;
+  queryParams?: Record<string, string>;
+  body?: any;
 }
 
-const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url }) => {
+const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url, queryParams, body }) => {
   const [copySuccess, setCopySuccess] = useState(false);
   const [copyCurlSuccess, setCopyCurlSuccess] = useState(false);
 
@@ -28,8 +30,13 @@ const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url }) => {
     }
   };
 
-  const handleCopyCurl = async () => {
-    const curlCommand = `curl -X ${method} "${url}" -H "Accept: application/json"`;
+  const copyCurl = async () => {
+    const token = localStorage.getItem('authToken');
+    const headers = token ? `-H 'x-auth-token: ${token}'` : '';
+    const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
+    const bodyString = body ? `-d '${JSON.stringify(body)}'` : '';
+    const curlCommand = `curl -X ${method} ${headers} '${url}${queryString}' ${bodyString}`;
+    
     try {
       await navigator.clipboard.writeText(curlCommand);
       setCopyCurlSuccess(true);
@@ -79,7 +86,7 @@ const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url }) => {
         <Tooltip title={copyCurlSuccess ? "Copied!" : "Copy as cURL"}>
           <IconButton 
             size="small" 
-            onClick={handleCopyCurl}
+            onClick={copyCurl}
             color={copyCurlSuccess ? "success" : "default"}
             sx={{ 
               '&:hover': { 

@@ -29,6 +29,7 @@ import { formatDate } from '../utils/dateUtils';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResponseDisplay from '../components/ResponseDisplay';
 import StatusCard from '../components/StatusCard';
+import { apiCall } from '../utils/api';
 
 interface PublishStatusResponse {
   webPath: string;
@@ -62,27 +63,33 @@ const PublishStatus: React.FC = () => {
   const [status, setStatus] = useState<PublishStatusResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string> } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setStatus(null);
+    setRequestDetails(null);
 
     try {
-      const response = await fetch(`https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`);
-      if (!response.ok) {
-        let errorMessage = `HTTP error! status: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } catch {
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
-      }
-      const data = await response.json();
-      setStatus(data);
+      const url = `https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`;
+      
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
+        method: 'GET',
+        headers: token ? { 'x-auth-token': token } : {},
+        queryParams: {},
+      });
+
+      const response = await apiCall<PublishStatusResponse>(url, {
+        method: 'GET',
+        headers: token ? { 'x-auth-token': token } : {},
+      });
+
+      setStatus(response.data);
     } catch (err) {
       const errorDetails: ErrorDetails = {
         message: err instanceof Error ? err.message : 'An unknown error occurred',
@@ -234,6 +241,8 @@ const PublishStatus: React.FC = () => {
           formattedContent={formattedContent}
           apiUrl={`https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`}
           method="GET"
+          headers={requestDetails?.headers}
+          queryParams={requestDetails?.queryParams}
         />
       )}
     </Box>

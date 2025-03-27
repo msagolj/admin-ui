@@ -27,6 +27,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResponseDisplay from '../components/ResponseDisplay';
 import StatusCard from '../components/StatusCard';
 import { apiCall } from '../utils/api';
+import { formatDate } from '../utils/dateUtils';
 
 interface PreviewResponse {
   webPath: string;
@@ -61,16 +62,30 @@ const PreviewStatus: React.FC = () => {
   const [status, setStatus] = useState<PreviewResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string> } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setStatus(null);
+    setRequestDetails(null);
 
     try {
-      const response = await apiCall<PreviewResponse>(`https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`, {
+      const url = `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`;
+      
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
         method: 'GET',
+        headers: token ? { 'x-auth-token': token } : {},
+        queryParams: {},
+      });
+
+      const response = await apiCall<PreviewResponse>(url, {
+        method: 'GET',
+        headers: token ? { 'x-auth-token': token } : {},
       });
       setStatus(response.data);
     } catch (err) {
@@ -226,47 +241,32 @@ const PreviewStatus: React.FC = () => {
         </Alert>
       )}
 
-      {status && (
+      {(status || requestDetails) && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ButtonGroup variant="outlined">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(false)}
-                color={!showRaw ? "primary" : "inherit"}
-              >
-                Formatted
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRaw(true)}
-                color={showRaw ? "primary" : "inherit"}
-              >
-                Raw Response
-              </Button>
-            </ButtonGroup>
-          </Box>
-
           <ResponseDisplay
             data={status}
             formattedContent={
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {status.preview.status !== undefined && (
-                  <StatusCard
-                    title="Preview Status"
-                    status={status.preview.status}
-                    url={status.preview.url}
-                    lastModified={status.preview.lastModified}
-                    contentBusId={status.preview.contentBusId}
-                    sourceLocation={status.preview.sourceLocation}
-                    sourceLastModified={status.preview.sourceLastModified}
-                    permissions={status.preview.permissions}
-                  />
-                )}
-              </Box>
+              status && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {status.preview && (
+                    <StatusCard
+                      title="Preview Status"
+                      status={status.preview.status}
+                      url={status.preview.url}
+                      lastModified={status.preview.lastModified}
+                      contentBusId={status.preview.contentBusId}
+                      sourceLocation={status.preview.sourceLocation}
+                      sourceLastModified={status.preview.sourceLastModified}
+                      permissions={status.preview.permissions}
+                    />
+                  )}
+                </Box>
+              )
             }
             apiUrl={`https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`}
             method="GET"
+            headers={requestDetails?.headers}
+            queryParams={requestDetails?.queryParams}
           />
         </Box>
       )}

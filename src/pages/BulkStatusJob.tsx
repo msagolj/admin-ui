@@ -29,6 +29,8 @@ import HelpIcon from '@mui/icons-material/Help';
 import { useResource } from '../context/ResourceContext';
 import MethodBadge from '../components/MethodBadge';
 import { formatDate } from '../utils/dateUtils';
+import { apiCall } from '../utils/api';
+import ResponseDisplay from '../components/ResponseDisplay';
 
 interface BulkStatusResponse {
   status: number;
@@ -51,6 +53,7 @@ interface BulkStatusResponse {
 interface ErrorDetails {
   message: string;
   details?: string;
+  status?: number;
 }
 
 const BulkStatusJob: React.FC = () => {
@@ -63,6 +66,13 @@ const BulkStatusJob: React.FC = () => {
   const [paths, setPaths] = useState<string[]>([]);
   const [newPath, setNewPath] = useState('');
   const [select, setSelect] = useState<string[]>(['edit', 'preview', 'live']);
+  const [requestDetails, setRequestDetails] = useState<{ 
+    url: string; 
+    method: string; 
+    headers: Record<string, string>; 
+    body: any;
+    queryParams?: Record<string, string>;
+  } | null>(null);
 
   const handleAddPath = () => {
     if (newPath && !paths.includes(newPath)) {
@@ -80,31 +90,44 @@ const BulkStatusJob: React.FC = () => {
     setLoading(true);
     setError(null);
     setStatus(null);
+    setRequestDetails(null);
 
     try {
-      const response = await fetch(`https://admin.hlx.page/status/${owner}/${repo}/${ref}/*`, {
+      const url = `https://admin.hlx.page/status/${owner}/${repo}/${ref}/*`;
+      const requestBody = {
+        select: select,
+        paths: paths.filter(p => p.trim())
+      };
+
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
+        method: 'POST',
+        headers: token ? { 'x-auth-token': token } : {},
+        body: requestBody,
+        queryParams: {}
+      });
+
+      const response = await apiCall<BulkStatusResponse>(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          select,
-          paths
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to start bulk status job');
-      }
-
-      const data = await response.json();
-      setStatus(data);
+      setStatus(response.data);
     } catch (err) {
-      setError({
-        message: err instanceof Error ? err.message : 'An error occurred',
+      const errorDetails: ErrorDetails = {
+        message: err instanceof Error ? err.message : 'An unknown error occurred',
+        status: err instanceof Error && err.message.includes('status:') 
+          ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
+          : undefined,
         details: err instanceof Error ? err.stack : undefined
-      });
+      };
+      setError(errorDetails);
+      console.error('Bulk status check error:', err);
     } finally {
       setLoading(false);
     }
@@ -274,131 +297,76 @@ const BulkStatusJob: React.FC = () => {
         </Alert>
       )}
 
-      {status && (
+      {(status || requestDetails) && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ButtonGroup variant="outlined">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(false)}
-                color={!showRaw ? "primary" : "inherit"}
-              >
-                Formatted
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRaw(true)}
-                color={showRaw ? "primary" : "inherit"}
-              >
-                Raw Response
-              </Button>
-            </ButtonGroup>
-          </Box>
-
-          {showRaw ? (
-            <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Raw API Response:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.875rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  m: 0,
-                  maxHeight: '600px',
-                  overflowY: 'auto',
-                  '&::-webkit-scrollbar': {
-                    width: '8px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    background: '#f1f1f1',
-                    borderRadius: '4px',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: '#888',
-                    borderRadius: '4px',
-                    '&:hover': {
-                      background: '#666',
-                    },
-                  },
-                }}
-              >
-                {JSON.stringify(status, null, 2)}
-              </Box>
-            </Paper>
-          ) : (
-            <Card>
-              <CardContent>
+          <ResponseDisplay
+            data={status}
+            formattedContent={
+              status && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h6">Job Status</Typography>
-                    <Chip
-                      label={status.job.state}
-                      color={status.job.state === 'created' ? 'success' : 'default'}
+                    <Typography variant="subtitle1">Job Details</Typography>
+                    <Chip 
+                      label={status.job.state} 
+                      color={status.job.state === 'completed' ? 'success' : status.job.state === 'failed' ? 'error' : 'primary'}
                       size="small"
                     />
                   </Box>
-                  <Typography variant="body1">Message ID: {status.messageId}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Job Name: {status.job.name}
+                  <Typography variant="body2">
+                    <strong>Topic:</strong> {status.job.topic}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Start Time: {formatDate(status.job.startTime)}
+                  <Typography variant="body2">
+                    <strong>Name:</strong> {status.job.name}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Start Time:</strong> {formatDate(status.job.startTime)}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Progress:</strong> {status.job.data.paths.length} / {status.job.data.paths.length} ({status.job.data.paths.length - status.job.data.paths.length} failed)
                   </Typography>
                   {status.job.data.paths && status.job.data.paths.length > 0 && (
                     <Box>
-                      <Typography variant="subtitle2" gutterBottom>
-                        Paths to Process:
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Paths:</strong>
                       </Typography>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                         {status.job.data.paths.map((path) => (
                           <Chip
                             key={path}
                             label={path}
-                            color="primary"
-                            variant="outlined"
                             size="small"
+                            variant="outlined"
                           />
                         ))}
                       </Stack>
                     </Box>
                   )}
-                  <Box>
-                    <Typography variant="subtitle2" gutterBottom>
-                      Links:
-                    </Typography>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                      <Chip
-                        label="View Job"
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                        component="a"
-                        href={status.links.self}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        clickable
-                      />
-                      <Chip
-                        label="Job List"
-                        color="primary"
-                        variant="outlined"
-                        size="small"
-                        component="a"
-                        href={status.links.list}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        clickable
-                      />
-                    </Stack>
-                  </Box>
+                  {status.links && (
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Links:</strong>
+                      </Typography>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {Object.entries(status.links).map(([key, url]) => (
+                          <Chip
+                            key={key}
+                            label={`${key}: ${url}`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
                 </Box>
-              </CardContent>
-            </Card>
-          )}
+              )
+            }
+            apiUrl={`https://admin.hlx.page/status/${owner}/${repo}/${ref}/*`}
+            method="POST"
+            headers={requestDetails?.headers}
+            queryParams={requestDetails?.queryParams}
+            body={requestDetails?.body}
+          />
         </Box>
       )}
     </Box>

@@ -70,12 +70,14 @@ const UpdatePreview: React.FC = () => {
   const [word2mdVersion, setWord2mdVersion] = useState('');
   const [gdocs2mdVersion, setGdocs2mdVersion] = useState('');
   const [html2mdVersion, setHtml2mdVersion] = useState('');
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string> } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setStatus(null);
+    setRequestDetails(null);
 
     try {
       const queryParams = new URLSearchParams();
@@ -84,8 +86,20 @@ const UpdatePreview: React.FC = () => {
       if (gdocs2mdVersion) queryParams.append('hlx-gdocs2md-version', gdocs2mdVersion);
       if (html2mdVersion) queryParams.append('hlx-html2md-version', html2mdVersion);
 
-      const response = await apiCall<PreviewResponse>(`https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`, {
+      const url = `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+      
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
         method: 'POST',
+        headers: token ? { 'x-auth-token': token } : {},
+        queryParams: Object.fromEntries(queryParams.entries()),
+      });
+
+      const response = await apiCall<PreviewResponse>(url, {
+        method: 'POST',
+        headers: token ? { 'x-auth-token': token } : {},
       });
       setStatus(response.data);
     } catch (err) {
@@ -255,90 +269,85 @@ const UpdatePreview: React.FC = () => {
         </form>
       </Paper>
 
-      {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mb: 2 }}
-          action={
-            <Button color="inherit" size="small" onClick={() => setError(null)}>
-              Dismiss
-            </Button>
-          }
-        >
-          <AlertTitle>Error</AlertTitle>
-          <Typography variant="body1" gutterBottom>
-            {error.message}
-          </Typography>
-          {error.status && (
-            <Typography variant="body2" color="text.secondary">
-              Status Code: {error.status}
-            </Typography>
-          )}
-          {error.details && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Technical Details:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                  p: 1,
-                  borderRadius: 1
-                }}
-              >
-                {error.details}
-              </Box>
-            </Box>
-          )}
-        </Alert>
-      )}
-
-      {status && (
+      {(status || requestDetails) && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ButtonGroup variant="outlined">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(false)}
-                color={!showRaw ? "primary" : "inherit"}
-              >
-                Formatted
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRaw(true)}
-                color={showRaw ? "primary" : "inherit"}
-              >
-                Raw Response
-              </Button>
-            </ButtonGroup>
-          </Box>
+          {error && (
+            <Alert 
+              severity="error" 
+              sx={{ mb: 2 }}
+              action={
+                <Button color="inherit" size="small" onClick={() => setError(null)}>
+                  Dismiss
+                </Button>
+              }
+            >
+              <AlertTitle>Error</AlertTitle>
+              <Typography variant="body1" gutterBottom>
+                {error.message}
+              </Typography>
+              {error.status && (
+                <Typography variant="body2" color="text.secondary">
+                  Status Code: {error.status}
+                </Typography>
+              )}
+              {error.details && (
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Technical Details:
+                  </Typography>
+                  <Box
+                    component="pre"
+                    sx={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-all',
+                      bgcolor: 'rgba(0, 0, 0, 0.04)',
+                      p: 1,
+                      borderRadius: 1
+                    }}
+                  >
+                    {error.details}
+                  </Box>
+                </Box>
+              )}
+            </Alert>
+          )}
 
           <ResponseDisplay
             data={status}
             formattedContent={
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {status.preview.status !== undefined && (
-                  <StatusCard
-                    title="Preview Status"
-                    status={status.preview.status}
-                    url={status.preview.url}
-                    lastModified={status.preview.lastModified}
-                    contentBusId={status.preview.contentBusId}
-                    sourceLocation={status.preview.sourceLocation}
-                    sourceLastModified={status.preview.sourceLastModified}
-                    permissions={status.preview.permissions}
-                  />
-                )}
-              </Box>
+              status && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {status.webPath && (
+                    <Typography variant="body2">
+                      <strong>Web Path:</strong> {status.webPath}
+                    </Typography>
+                  )}
+                  {status.resourcePath && (
+                    <Typography variant="body2">
+                      <strong>Resource Path:</strong> {status.resourcePath}
+                    </Typography>
+                  )}
+                  {status.preview && (
+                    <StatusCard
+                      title="Preview Status"
+                      status={status.preview.status}
+                      url={status.preview.url}
+                      lastModified={status.preview.lastModified}
+                      contentBusId={status.preview.contentBusId}
+                      sourceLocation={status.preview.sourceLocation}
+                      sourceLastModified={status.preview.sourceLastModified}
+                      permissions={status.preview.permissions}
+                    />
+                  )}
+                </Box>
+              )
             }
             apiUrl={`https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`}
             method="POST"
+            headers={requestDetails?.headers}
+            queryParams={requestDetails?.queryParams}
           />
         </Box>
       )}

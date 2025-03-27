@@ -16,7 +16,9 @@ import {
   IconButton,
   Tooltip,
   FormControlLabel,
-  Switch
+  Switch,
+  Chip,
+  Stack
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -34,22 +36,25 @@ import StatusCard from '../components/StatusCard';
 import { apiCall } from '../utils/api';
 
 interface PublishResponse {
-  webPath: string;
-  resourcePath: string;
-  live: {
-    status: number;
-    url: string;
-    lastModified: string;
-    contentBusId: string;
-    sourceLocation: string;
-    sourceLastModified: string;
-    permissions: string[];
+  status: number;
+  messageId: string;
+  job: {
+    topic: string;
+    name: string;
+    state: string;
+    startTime: string;
+    progress: {
+      total: number;
+      processed: number;
+      failed: number;
+    };
+    data: {
+      paths: string[];
+    };
   };
   links: {
-    status: string;
-    preview: string;
-    live: string;
-    code: string;
+    self: string;
+    list: string;
   };
 }
 
@@ -291,120 +296,75 @@ const Publish: React.FC = () => {
         </Alert>
       )}
 
-      {status && (
+      {(status || requestDetails) && (
         <Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-            <ButtonGroup variant="outlined">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(false)}
-                color={!showRaw ? "primary" : "inherit"}
-              >
-                Formatted
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRaw(true)}
-                color={showRaw ? "primary" : "inherit"}
-              >
-                Raw Response
-              </Button>
-              <Button
-                startIcon={<CodeIcon />}
-                onClick={() => setShowRequestDetails(!showRequestDetails)}
-                color={showRequestDetails ? "primary" : "inherit"}
-              >
-                {showRequestDetails ? "Hide Request" : "Show Request"}
-              </Button>
-            </ButtonGroup>
-          </Box>
-
-          {requestDetails && showRequestDetails && (
-            <Paper sx={{ p: 2, mb: 2, bgcolor: 'grey.50' }}>
-              <Typography variant="h6" gutterBottom>Request Details</Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">URL</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
-                    {requestDetails.url}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Method</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                    {requestDetails.method}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary">Headers</Typography>
-                  <Box sx={{ 
-                    fontFamily: 'monospace',
-                    fontSize: '0.875rem',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-all',
-                    bgcolor: 'rgba(0, 0, 0, 0.04)',
-                    p: 1,
-                    borderRadius: 1
-                  }}>
-                    {JSON.stringify(requestDetails.headers, null, 2)}
-                  </Box>
-                </Box>
-                {Object.keys(requestDetails.queryParams).length > 0 && (
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Query Parameters</Typography>
-                    <Box sx={{ 
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-all',
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                      p: 1,
-                      borderRadius: 1
-                    }}>
-                      {JSON.stringify(requestDetails.queryParams, null, 2)}
-                    </Box>
-                  </Box>
-                )}
-                {requestDetails.body && (
-                  <Box>
-                    <Typography variant="subtitle2" color="text.secondary">Request Body</Typography>
-                    <Box sx={{ 
-                      fontFamily: 'monospace',
-                      fontSize: '0.875rem',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-all',
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                      p: 1,
-                      borderRadius: 1
-                    }}>
-                      {JSON.stringify(requestDetails.body, null, 2)}
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          )}
-
           <ResponseDisplay
             data={status}
             formattedContent={
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {status.live.status !== undefined && (
-                  <StatusCard
-                    title="Live Status"
-                    status={status.live.status}
-                    url={status.live.url}
-                    lastModified={status.live.lastModified}
-                    contentBusId={status.live.contentBusId}
-                    sourceLocation={status.live.sourceLocation}
-                    sourceLastModified={status.live.sourceLastModified}
-                    permissions={status.live.permissions}
-                  />
-                )}
-              </Box>
+              status && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle1">Job Details</Typography>
+                    <Chip 
+                      label={status.job.state} 
+                      color={status.job.state === 'completed' ? 'success' : status.job.state === 'failed' ? 'error' : 'primary'}
+                      size="small"
+                    />
+                  </Box>
+                  <Typography variant="body2">
+                    <strong>Topic:</strong> {status.job.topic}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Name:</strong> {status.job.name}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Start Time:</strong> {formatDate(status.job.startTime)}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Progress:</strong> {status.job.progress.processed} / {status.job.progress.total} ({status.job.progress.failed} failed)
+                  </Typography>
+                  {status.job.data.paths && status.job.data.paths.length > 0 && (
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Paths:</strong>
+                      </Typography>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {status.job.data.paths.map((path: string) => (
+                          <Chip
+                            key={path}
+                            label={path}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+                  {status.links && (
+                    <Box>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <strong>Links:</strong>
+                      </Typography>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        {Object.entries(status.links).map(([key, url]) => (
+                          <Chip
+                            key={key}
+                            label={`${key}: ${url}`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  )}
+                </Box>
+              )
             }
-            apiUrl={`https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`}
+            apiUrl={`https://admin.hlx.page/publish/${owner}/${repo}/${ref}/*`}
             method="POST"
+            headers={requestDetails?.headers}
+            queryParams={requestDetails?.queryParams}
+            body={requestDetails?.body}
           />
         </Box>
       )}
