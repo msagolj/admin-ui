@@ -32,6 +32,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResponseDisplay from '../components/ResponseDisplay';
 import StatusCard from '../components/StatusCard';
 import { apiCall } from '../utils/api';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface PreviewResponse {
   webPath: string;
@@ -57,12 +58,13 @@ interface ErrorDetails {
   message: string;
   status?: number;
   details?: string;
+  errorHeaders?: Record<string, string>;
 }
 
 const UpdatePreview: React.FC = () => {
   const { owner, setOwner, repo, setRepo, ref, setRef, path, setPath } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
   const [status, setStatus] = useState<PreviewResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -70,12 +72,12 @@ const UpdatePreview: React.FC = () => {
   const [word2mdVersion, setWord2mdVersion] = useState('');
   const [gdocs2mdVersion, setGdocs2mdVersion] = useState('');
   const [html2mdVersion, setHtml2mdVersion] = useState('');
-  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string> } | null>(null);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string>; body: any } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    clearError();
     setStatus(null);
     setRequestDetails(null);
 
@@ -95,6 +97,7 @@ const UpdatePreview: React.FC = () => {
         method: 'POST',
         headers: token ? { 'x-auth-token': token } : {},
         queryParams: Object.fromEntries(queryParams.entries()),
+        body: {}
       });
 
       const response = await apiCall<PreviewResponse>(url, {
@@ -108,10 +111,10 @@ const UpdatePreview: React.FC = () => {
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Update preview error:', err);
+      handleError(errorDetails, 'Update preview');
     } finally {
       setLoading(false);
     }
@@ -276,14 +279,14 @@ const UpdatePreview: React.FC = () => {
               severity="error" 
               sx={{ mb: 2 }}
               action={
-                <Button color="inherit" size="small" onClick={() => setError(null)}>
+                <Button color="inherit" size="small" onClick={clearError}>
                   Dismiss
                 </Button>
               }
             >
               <AlertTitle>Error</AlertTitle>
               <Typography variant="body1" gutterBottom>
-                {error.message}
+                {getErrorDisplay()?.message}
               </Typography>
               {error.status && (
                 <Typography variant="body2" color="text.secondary">

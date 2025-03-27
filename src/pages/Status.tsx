@@ -18,7 +18,9 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   FormControlLabel,
-  Switch
+  Switch,
+  Chip,
+  Stack
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -34,6 +36,8 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResponseDisplay from '../components/ResponseDisplay';
 import StatusCard from '../components/StatusCard';
 import { apiCall } from '../utils/api';
+import ErrorDisplay from '../components/ErrorDisplay';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface StatusResponse {
   webPath: string;
@@ -77,12 +81,12 @@ interface ErrorDetails {
   message: string;
   status?: number;
   details?: string;
+  errorHeaders?: Record<string, string>;
 }
 
 const Status: React.FC = () => {
   const { owner, setOwner, repo, setRepo, ref, setRef, path, setPath } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
@@ -94,11 +98,11 @@ const Status: React.FC = () => {
   } | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
   const [editUrl, setEditUrl] = useState('');
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     setStatus(null);
     setRequestDetails(null);
 
@@ -128,9 +132,10 @@ const Status: React.FC = () => {
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
+      handleError(errorDetails, 'Status check');
       console.error('Status check error:', err);
     } finally {
       setLoading(false);
@@ -277,25 +282,10 @@ const Status: React.FC = () => {
         </form>
       </Paper>
 
-      {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mb: 3 }}
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={handleCopyUrl}
-              startIcon={copySuccess ? <CheckIcon /> : <ContentCopyIcon />}
-            >
-              {copySuccess ? 'Copied!' : 'Copy URL'}
-            </Button>
-          }
-        >
-          <AlertTitle>Error</AlertTitle>
-          {error.message}
-        </Alert>
-      )}
+      <ErrorDisplay 
+        error={error} 
+        onDismiss={clearError}
+      />
 
       {status && (
         <Box>

@@ -35,7 +35,7 @@ const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url, queryParams,
     const headers = token ? `-H 'x-auth-token: ${token}'` : '';
     const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
     const bodyString = body ? `-d '${JSON.stringify(body)}'` : '';
-    const curlCommand = `curl -X ${method} ${headers} '${url}${queryString}' ${bodyString}`;
+    const curlCommand = `curl -v -X ${method} ${headers} '${url}${queryString}' ${bodyString}`;
     
     try {
       await navigator.clipboard.writeText(curlCommand);

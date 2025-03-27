@@ -34,6 +34,8 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResponseDisplay from '../components/ResponseDisplay';
 import StatusCard from '../components/StatusCard';
 import { apiCall } from '../utils/api';
+import { useErrorHandler } from '../hooks/useErrorHandler';
+import ErrorDisplay from '../components/ErrorDisplay';
 
 interface UnpublishResponse {
   status: number;
@@ -62,25 +64,20 @@ interface ErrorDetails {
   message: string;
   status?: number;
   details?: string;
+  errorHeaders?: Record<string, string>;
 }
 
 const Unpublish: React.FC = () => {
   const { owner, setOwner, repo, setRepo, ref, setRef, path, setPath } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
   const [status, setStatus] = useState<UnpublishResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [forceUpdateRedirects, setForceUpdateRedirects] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
-  const [requestDetails, setRequestDetails] = useState<{ 
-    url: string; 
-    method: string; 
-    headers: Record<string, string>; 
-    body: any;
-    queryParams?: Record<string, string>;
-  } | null>(null);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string>; body: any } | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,12 +87,16 @@ const Unpublish: React.FC = () => {
   const handleConfirm = async () => {
     setConfirmOpen(false);
     setLoading(true);
-    setError(null);
+    clearError();
     setStatus(null);
     setRequestDetails(null);
 
     try {
-      const url = `https://admin.hlx.page/unpublish/${owner}/${repo}/${ref}/${path}`;
+      const queryParams = new URLSearchParams();
+      if (forceUpdateRedirects) queryParams.append('forceUpdateRedirects', 'true');
+      if (disableNotifications) queryParams.append('disableNotifications', 'true');
+
+      const url = `https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       
       // Store request details with auth token
       const token = localStorage.getItem('authToken');
@@ -103,26 +104,30 @@ const Unpublish: React.FC = () => {
         url,
         method: 'DELETE',
         headers: token ? { 'x-auth-token': token } : {},
-        body: {},
-        queryParams: {}
+        queryParams: Object.fromEntries(queryParams.entries()),
+        body: {}
       });
 
       const response = await apiCall<UnpublishResponse>(url, {
         method: 'DELETE',
         headers: token ? { 'x-auth-token': token } : {},
       });
-      setStatus(response.data);
-      setShowRaw(false);
+      
+      if (response.data) {
+        setStatus(response.data);
+        setShowRaw(false);
+      }
     } catch (err) {
       const errorDetails: ErrorDetails = {
         message: err instanceof Error ? err.message : 'An unknown error occurred',
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Unpublish error:', err);
+      handleError(errorDetails, 'Unpublish');
+      setStatus(null);
     } finally {
       setLoading(false);
     }
@@ -146,28 +151,41 @@ const Unpublish: React.FC = () => {
   const handleUnpublish = async () => {
     try {
       setLoading(true);
+      clearError();
+      setStatus(null);
+      setRequestDetails(null);
+
       const queryParams = new URLSearchParams();
       if (forceUpdateRedirects) queryParams.append('forceUpdateRedirects', 'true');
       if (disableNotifications) queryParams.append('disableNotifications', 'true');
 
       const url = `https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
       
+      // Store request details with auth token
+      const token = localStorage.getItem('authToken');
+      setRequestDetails({
+        url,
+        method: 'DELETE',
+        headers: token ? { 'x-auth-token': token } : {},
+        queryParams: Object.fromEntries(queryParams.entries()),
+        body: {}
+      });
+
       const response = await apiCall<UnpublishResponse>(url, {
         method: 'DELETE',
       });
       
       setStatus(response.data);
-      setShowRaw(false);
     } catch (err) {
       const errorDetails: ErrorDetails = {
         message: err instanceof Error ? err.message : 'An unknown error occurred',
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Unpublish error:', err);
+      handleError(errorDetails, 'Unpublish');
     } finally {
       setLoading(false);
     }
@@ -292,50 +310,12 @@ const Unpublish: React.FC = () => {
         </form>
       </Paper>
 
-      {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mb: 2 }}
-          action={
-            <Button color="inherit" size="small" onClick={() => setError(null)}>
-              Dismiss
-            </Button>
-          }
-        >
-          <AlertTitle>Error</AlertTitle>
-          <Typography variant="body1" gutterBottom>
-            {error.message}
-          </Typography>
-          {error.status && (
-            <Typography variant="body2" color="text.secondary">
-              Status Code: {error.status}
-            </Typography>
-          )}
-          {error.details && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Technical Details:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                  p: 1,
-                  borderRadius: 1
-                }}
-              >
-                {error.details}
-              </Box>
-            </Box>
-          )}
-        </Alert>
-      )}
+      <ErrorDisplay 
+        error={error} 
+        onDismiss={clearError}
+      />
 
-      {(status || requestDetails) && (
+      {status && !error && requestDetails && (
         <Box>
           <ResponseDisplay
             data={status}
@@ -399,11 +379,11 @@ const Unpublish: React.FC = () => {
                 </Box>
               )
             }
-            apiUrl={`https://admin.hlx.page/unpublish/${owner}/${repo}/${ref}/*`}
-            method="POST"
-            headers={requestDetails?.headers}
-            queryParams={requestDetails?.queryParams}
-            body={requestDetails?.body}
+            apiUrl={requestDetails.url}
+            method={requestDetails.method}
+            headers={requestDetails.headers}
+            queryParams={requestDetails.queryParams}
+            body={requestDetails.body}
           />
         </Box>
       )}

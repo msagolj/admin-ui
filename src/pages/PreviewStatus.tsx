@@ -7,27 +7,26 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Card,
-  CardContent,
-  ButtonGroup,
-  Grid,
-  Link,
   AlertTitle,
   IconButton,
-  Tooltip
+  Tooltip,
+  ButtonGroup,
+  Link,
+  Chip,
+  Stack
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import ErrorIcon from '@mui/icons-material/Error';
 import CodeIcon from '@mui/icons-material/Code';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import HelpIcon from '@mui/icons-material/Help';
-import CheckIcon from '@mui/icons-material/Check';
 import { useResource } from '../context/ResourceContext';
-import MethodBadge from '../components/MethodBadge';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResponseDisplay from '../components/ResponseDisplay';
-import StatusCard from '../components/StatusCard';
+import ErrorDisplay from '../components/ErrorDisplay';
 import { apiCall } from '../utils/api';
-import { formatDate } from '../utils/dateUtils';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface PreviewResponse {
   webPath: string;
@@ -37,8 +36,8 @@ interface PreviewResponse {
     url: string;
     lastModified: string;
     contentBusId: string;
-    sourceLocation: string;
-    sourceLastModified: string;
+    sourceLocation?: string;
+    sourceLastModified?: string;
     permissions: string[];
   };
   links: {
@@ -53,21 +52,20 @@ interface ErrorDetails {
   message: string;
   status?: number;
   details?: string;
+  errorHeaders?: Record<string, string>;
 }
 
 const PreviewStatus: React.FC = () => {
   const { owner, setOwner, repo, setRepo, ref, setRef, path, setPath } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
   const [status, setStatus] = useState<PreviewResponse | null>(null);
-  const [showRaw, setShowRaw] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string> } | null>(null);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string>; body: any } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    clearError();
     setStatus(null);
     setRequestDetails(null);
 
@@ -81,6 +79,7 @@ const PreviewStatus: React.FC = () => {
         method: 'GET',
         headers: token ? { 'x-auth-token': token } : {},
         queryParams: {},
+        body: {}
       });
 
       const response = await apiCall<PreviewResponse>(url, {
@@ -94,23 +93,12 @@ const PreviewStatus: React.FC = () => {
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Preview status error:', err);
+      handleError(errorDetails, 'Preview status');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCopyUrl = async () => {
-    const url = `https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy URL:', err);
     }
   };
 
@@ -118,7 +106,7 @@ const PreviewStatus: React.FC = () => {
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h4" component="h1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <VisibilityIcon fontSize="large" />
+          <CloudDownloadIcon fontSize="large" />
           Preview Status
         </Typography>
         <Tooltip title="View API Documentation">
@@ -134,7 +122,7 @@ const PreviewStatus: React.FC = () => {
         </Tooltip>
       </Box>
       <Typography variant="subtitle1" color="text.secondary" paragraph>
-        Check the preview status of a resource in the preview content-bus partition.
+        Check the status of a preview resource.
       </Typography>
 
       <Paper sx={{ p: 3, mb: 3 }}>
@@ -185,6 +173,8 @@ const PreviewStatus: React.FC = () => {
             <ApiUrlDisplay
               method="GET"
               url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              queryParams={{}}
+              body={{}}
             />
             <Button
               variant="contained"
@@ -198,48 +188,10 @@ const PreviewStatus: React.FC = () => {
         </form>
       </Paper>
 
-      {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mb: 2 }}
-          action={
-            <Button color="inherit" size="small" onClick={() => setError(null)}>
-              Dismiss
-            </Button>
-          }
-        >
-          <AlertTitle>Error</AlertTitle>
-          <Typography variant="body1" gutterBottom>
-            {error.message}
-          </Typography>
-          {error.status && (
-            <Typography variant="body2" color="text.secondary">
-              Status Code: {error.status}
-            </Typography>
-          )}
-          {error.details && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Technical Details:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                  p: 1,
-                  borderRadius: 1
-                }}
-              >
-                {error.details}
-              </Box>
-            </Box>
-          )}
-        </Alert>
-      )}
+      <ErrorDisplay 
+        error={error} 
+        onDismiss={clearError}
+      />
 
       {(status || requestDetails) && (
         <Box>
@@ -248,18 +200,41 @@ const PreviewStatus: React.FC = () => {
             formattedContent={
               status && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {status.preview && (
-                    <StatusCard
-                      title="Preview Status"
-                      status={status.preview.status}
-                      url={status.preview.url}
-                      lastModified={status.preview.lastModified}
-                      contentBusId={status.preview.contentBusId}
-                      sourceLocation={status.preview.sourceLocation}
-                      sourceLastModified={status.preview.sourceLastModified}
-                      permissions={status.preview.permissions}
-                    />
+                  <Typography variant="subtitle1">Preview Details</Typography>
+                  <Typography variant="body2">
+                    <strong>Web Path:</strong> {status.webPath}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Resource Path:</strong> {status.resourcePath}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Status:</strong> {status.preview.status}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>URL:</strong> {status.preview.url}
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>Last Modified:</strong> {new Date(status.preview.lastModified).toLocaleString()}
+                  </Typography>
+                  {status.preview.sourceLocation && (
+                    <Typography variant="body2">
+                      <strong>Source Location:</strong> {status.preview.sourceLocation}
+                    </Typography>
                   )}
+                  {status.preview.sourceLastModified && (
+                    <Typography variant="body2">
+                      <strong>Source Last Modified:</strong> {new Date(status.preview.sourceLastModified).toLocaleString()}
+                    </Typography>
+                  )}
+                  <Typography variant="body2">
+                    <strong>Permissions:</strong> {status.preview.permissions.join(', ')}
+                  </Typography>
+                  <Typography variant="subtitle1">Links</Typography>
+                  {Object.entries(status.links).map(([key, url]) => (
+                    <Typography key={key} variant="body2">
+                      <strong>{key}:</strong> {url}
+                    </Typography>
+                  ))}
                 </Box>
               )
             }
@@ -267,6 +242,7 @@ const PreviewStatus: React.FC = () => {
             method="GET"
             headers={requestDetails?.headers}
             queryParams={requestDetails?.queryParams}
+            body={requestDetails?.body}
           />
         </Box>
       )}

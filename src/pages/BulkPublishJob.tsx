@@ -32,6 +32,8 @@ import { formatDate } from '../utils/dateUtils';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import { apiCall } from '../utils/api';
 import ResponseDisplay from '../components/ResponseDisplay';
+import ErrorDisplay from '../components/ErrorDisplay';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface BulkPublishResponse {
   status: number;
@@ -60,26 +62,21 @@ interface ErrorDetails {
   message: string;
   status?: number;
   details?: string;
+  errorHeaders?: Record<string, string>;
 }
 
 const BulkPublishJob: React.FC = () => {
-  const { owner, repo, ref } = useResource();
+  const { owner, setOwner, repo, setRepo, ref, setRef } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
   const [status, setStatus] = useState<BulkPublishResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [forceUpdateRedirects, setForceUpdateRedirects] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
-  const [paths, setPaths] = useState<string[]>([]);
+  const [paths, setPaths] = useState<string[]>(['']);
   const [newPath, setNewPath] = useState('');
-  const [requestDetails, setRequestDetails] = useState<{ 
-    url: string; 
-    method: string; 
-    headers: Record<string, string>; 
-    body: any;
-    queryParams?: Record<string, string>;
-  } | null>(null);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string>; body: any } | null>(null);
 
   const handleAddPath = () => {
     if (newPath && !paths.includes(newPath)) {
@@ -95,7 +92,7 @@ const BulkPublishJob: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    clearError();
     setStatus(null);
     setRequestDetails(null);
 
@@ -130,10 +127,10 @@ const BulkPublishJob: React.FC = () => {
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Bulk publish error:', err);
+      handleError(errorDetails, 'Bulk publish job');
     } finally {
       setLoading(false);
     }
@@ -192,6 +189,7 @@ const BulkPublishJob: React.FC = () => {
                 required
                 placeholder="Repository owner"
                 helperText="Repository owner (e.g., organization or user name)"
+                onChange={(e) => setOwner(e.target.value)}
               />
               <TextField
                 fullWidth
@@ -200,6 +198,7 @@ const BulkPublishJob: React.FC = () => {
                 required
                 placeholder="Repository name"
                 helperText="Name of the repository"
+                onChange={(e) => setRepo(e.target.value)}
               />
               <TextField
                 fullWidth
@@ -208,6 +207,7 @@ const BulkPublishJob: React.FC = () => {
                 required
                 placeholder="Branch or ref"
                 helperText="Ref (branch) of repository"
+                onChange={(e) => setRef(e.target.value)}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -292,48 +292,10 @@ const BulkPublishJob: React.FC = () => {
         </form>
       </Paper>
 
-      {error && (
-        <Alert 
-          severity="error" 
-          sx={{ mb: 2 }}
-          action={
-            <Button color="inherit" size="small" onClick={() => setError(null)}>
-              Dismiss
-            </Button>
-          }
-        >
-          <AlertTitle>Error</AlertTitle>
-          <Typography variant="body1" gutterBottom>
-            {error.message}
-          </Typography>
-          {error.status && (
-            <Typography variant="body2" color="text.secondary">
-              Status Code: {error.status}
-            </Typography>
-          )}
-          {error.details && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-                Technical Details:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.75rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                  p: 1,
-                  borderRadius: 1
-                }}
-              >
-                {error.details}
-              </Box>
-            </Box>
-          )}
-        </Alert>
-      )}
+      <ErrorDisplay 
+        error={error} 
+        onDismiss={clearError}
+      />
 
       {(status || requestDetails) && (
         <Box>

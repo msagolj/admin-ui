@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import { ApiError } from './errorUtils';
 
 interface ApiResponse<T> {
   data: T;
@@ -9,35 +10,42 @@ interface ApiResponse<T> {
 export async function apiCall<T>(
   url: string,
   options: RequestInit = {}
-): Promise<ApiResponse<T>> {
+): Promise<{ data: T }> {
   const token = localStorage.getItem('authToken');
   
   const headers = {
-    'Accept': 'application/json',
-    ...(token ? { 'x-auth-token': token } : {}),
+    'Content-Type': 'application/json',
+    ...(token && { 'x-auth-token': token }),
     ...options.headers,
   };
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: 'include',
+      mode: 'cors',
+    });
 
-  if (!response.ok) {
-    let errorMessage = `HTTP error! status: ${response.status}`;
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch {
-      errorMessage = response.statusText || errorMessage;
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      console.log(response.headers.get('x-error-code'))
+      const errorHeaders = {
+        errorCode: response.headers.get('x-error-code'),
+        error: response.headers.get('x-error'),
+      };
+      throw new ApiError(errorMessage, response.status, errorHeaders);
     }
-    throw new Error(errorMessage);
-  }
 
-  const data = await response.json();
-  return {
-    data,
-    status: response.status,
-    statusText: response.statusText,
-  };
+    const data = await response.json();
+    return { data };
+  } catch (err) {
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    if (err instanceof Error) {
+      throw new ApiError(err.message, 0);
+    }
+    throw new ApiError('An unknown error occurred', 0);
+  }
 } 

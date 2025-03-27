@@ -32,6 +32,7 @@ import { formatDate } from '../utils/dateUtils';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import { apiCall } from '../utils/api';
 import ResponseDisplay from '../components/ResponseDisplay';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface BulkPreviewResponse {
   topic: string;
@@ -57,6 +58,7 @@ interface ErrorDetails {
   message: string;
   status?: number;
   details?: string;
+  errorHeaders?: Record<string, string>;
 }
 
 interface RequestDetails {
@@ -70,7 +72,7 @@ interface RequestDetails {
 const BulkPreviewJob: React.FC = () => {
   const { owner, setOwner, repo, setRepo, ref, setRef } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
   const [status, setStatus] = useState<BulkPreviewResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -78,9 +80,9 @@ const BulkPreviewJob: React.FC = () => {
   const [word2mdVersion, setWord2mdVersion] = useState('');
   const [gdocs2mdVersion, setGdocs2mdVersion] = useState('');
   const [html2mdVersion, setHtml2mdVersion] = useState('');
-  const [paths, setPaths] = useState<string[]>([]);
+  const [paths, setPaths] = useState<string[]>(['']);
   const [newPath, setNewPath] = useState('');
-  const [requestDetails, setRequestDetails] = useState<RequestDetails | null>(null);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string>; body: any } | null>(null);
   const [jobName, setJobName] = useState<string>('');
 
   const handleAddPath = () => {
@@ -97,7 +99,7 @@ const BulkPreviewJob: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    clearError();
     setStatus(null);
     setRequestDetails(null);
 
@@ -114,6 +116,7 @@ const BulkPreviewJob: React.FC = () => {
         method: 'POST',
         headers: token ? { 'x-auth-token': token } : {},
         body: requestBody,
+        queryParams: {}
       });
 
       const response = await apiCall<BulkPreviewResponse>(url, {
@@ -131,10 +134,10 @@ const BulkPreviewJob: React.FC = () => {
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Bulk preview error:', err);
+      handleError(errorDetails, 'Bulk preview job');
     } finally {
       setLoading(false);
     }
@@ -360,14 +363,14 @@ const BulkPreviewJob: React.FC = () => {
           severity="error" 
           sx={{ mb: 2 }}
           action={
-            <Button color="inherit" size="small" onClick={() => setError(null)}>
+            <Button color="inherit" size="small" onClick={clearError}>
               Dismiss
             </Button>
           }
         >
           <AlertTitle>Error</AlertTitle>
           <Typography variant="body1" gutterBottom>
-            {error.message}
+            {getErrorDisplay()?.message}
           </Typography>
           {error.status && (
             <Typography variant="body2" color="text.secondary">

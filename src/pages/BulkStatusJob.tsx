@@ -31,6 +31,8 @@ import MethodBadge from '../components/MethodBadge';
 import { formatDate } from '../utils/dateUtils';
 import { apiCall } from '../utils/api';
 import ResponseDisplay from '../components/ResponseDisplay';
+import ErrorDisplay from '../components/ErrorDisplay';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface BulkStatusResponse {
   status: number;
@@ -54,25 +56,20 @@ interface ErrorDetails {
   message: string;
   details?: string;
   status?: number;
+  errorHeaders?: Record<string, string>;
 }
 
 const BulkStatusJob: React.FC = () => {
   const { owner, setOwner, repo, setRepo, ref, setRef } = useResource();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorDetails | null>(null);
+  const { error, handleError, clearError, getErrorDisplay } = useErrorHandler();
   const [status, setStatus] = useState<BulkStatusResponse | null>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [paths, setPaths] = useState<string[]>([]);
+  const [paths, setPaths] = useState<string[]>(['']);
   const [newPath, setNewPath] = useState('');
   const [select, setSelect] = useState<string[]>(['edit', 'preview', 'live']);
-  const [requestDetails, setRequestDetails] = useState<{ 
-    url: string; 
-    method: string; 
-    headers: Record<string, string>; 
-    body: any;
-    queryParams?: Record<string, string>;
-  } | null>(null);
+  const [requestDetails, setRequestDetails] = useState<{ url: string; method: string; headers: Record<string, string>; queryParams: Record<string, string>; body: any } | null>(null);
 
   const handleAddPath = () => {
     if (newPath && !paths.includes(newPath)) {
@@ -88,14 +85,13 @@ const BulkStatusJob: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    clearError();
     setStatus(null);
     setRequestDetails(null);
 
     try {
       const url = `https://admin.hlx.page/status/${owner}/${repo}/${ref}/*`;
       const requestBody = {
-        select: select,
         paths: paths.filter(p => p.trim())
       };
 
@@ -124,10 +120,10 @@ const BulkStatusJob: React.FC = () => {
         status: err instanceof Error && err.message.includes('status:') 
           ? parseInt(err.message.match(/status: (\d+)/)?.[1] || '0')
           : undefined,
-        details: err instanceof Error ? err.stack : undefined
+        details: err instanceof Error ? err.stack : undefined,
+        errorHeaders: err instanceof Error && 'errorHeaders' in err ? (err as any).errorHeaders : undefined
       };
-      setError(errorDetails);
-      console.error('Bulk status check error:', err);
+      handleError(errorDetails, 'Bulk status job');
     } finally {
       setLoading(false);
     }
@@ -267,35 +263,10 @@ const BulkStatusJob: React.FC = () => {
         </form>
       </Paper>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          <AlertTitle>Error</AlertTitle>
-          {error.message}
-          {error.details && (
-            <Box sx={{ mt: 2 }}>
-              <Typography variant="caption" color="text.secondary">
-                Details:
-              </Typography>
-              <Box
-                component="pre"
-                sx={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.875rem',
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-all',
-                  m: 0,
-                  mt: 1,
-                  p: 1,
-                  bgcolor: 'grey.50',
-                  borderRadius: 1,
-                }}
-              >
-                {error.details}
-              </Box>
-            </Box>
-          )}
-        </Alert>
-      )}
+      <ErrorDisplay 
+        error={error} 
+        onDismiss={clearError}
+      />
 
       {(status || requestDetails) && (
         <Box>
