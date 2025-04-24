@@ -68,6 +68,7 @@ const existingRoutes = [
   '/index/reindex',
   '/index/remove',
   '/org-config/read',
+  '/org-config/users',
   '/site-config/list',
   '/site-config/read'
 ];
@@ -219,10 +220,10 @@ const menuGroups: MenuGroup[] = [
         icon: <BusinessIcon />,
         subItems: [
           { text: 'Read Org Config', path: '/org-config/read', method: 'GET' },
+          { text: 'List Users', path: '/org-config/users', method: 'GET' },
           { text: 'Update Org Config', path: '/org-config/update', method: 'POST' },
           { text: 'Create Org Config', path: '/org-config/create', method: 'PUT' },
           { text: 'Delete Org Config', path: '/org-config/delete', method: 'DELETE' },
-          { text: 'List Users', path: '/org-config/users/list', method: 'GET' },
           { text: 'Create User', path: '/org-config/users/create', method: 'POST' },
           { text: 'Read User', path: '/org-config/users/read', method: 'GET' },
           { text: 'Delete User', path: '/org-config/users/delete', method: 'DELETE' },

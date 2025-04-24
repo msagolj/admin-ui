@@ -11,6 +11,7 @@ import StatusIndex from './pages/IndexStatus';
 import IndexReindex from './pages/IndexReindex';
 import IndexRemoveResource from './pages/IndexRemoveResource';
 import OrgConfigReadConfig from './pages/OrgConfigReadConfig';
+import OrgConfigListUsers from './pages/OrgConfigListUsers';
 import SiteConfigListConfig from './pages/SiteConfigListConfig';
 import SiteConfigReadConfig from './pages/SiteConfigReadConfig';
 import PreviewStatus from './pages/PreviewStatus';
@@ -54,6 +55,7 @@ const App: React.FC = () => {
                 <Route path="/index/reindex" element={<IndexReindex />} />
                 <Route path="/index/remove" element={<IndexRemoveResource />} />
                 <Route path="/org-config/read" element={<OrgConfigReadConfig />} />
+                <Route path="/org-config/users" element={<OrgConfigListUsers />} />
                 <Route path="/site-config/list" element={<SiteConfigListConfig />} />
                 <Route path="/site-config/read" element={<SiteConfigReadConfig />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
