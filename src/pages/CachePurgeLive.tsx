@@ -3,18 +3,18 @@ import {
   Box,
   Paper,
   Button,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material';
-import PreviewIcon from '@mui/icons-material/Preview';
+import CachedIcon from '@mui/icons-material/Cached';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import ResponseDisplay from 'components/ResponseDisplay';
 
-const PreviewStatus: React.FC = () => {
+const CachePurgeLive: React.FC = () => {
   const { owner, repo, ref, path } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
   const [requestDetails, setRequestDetails] = useState<{
@@ -28,11 +28,11 @@ const PreviewStatus: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`,
-      method: 'GET',
+      url: `https://admin.hlx.page/cache/${owner}/${repo}/${ref}/${path}`,
+      method: 'POST',
       headers: {},
       queryParams: {},
-      body: null,
+      body: {}
     };
     setRequestDetails(details);
     executeSubmit(details);
@@ -41,10 +41,14 @@ const PreviewStatus: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title="Preview Status"
-        description="Returns the preview status of the respective resource."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/preview/operation/previewStatus"
-        icon={PreviewIcon}
+        title="Purge Live Cache"
+        description={
+          <>
+            Purges the resource from the respective live CDN. It optionally invokes the BYO CDN purging hook, if configured.
+          </>
+        }
+        helpUrl="https://www.aem.live/docs/admin.html#tag/cache/operation/purgeCache"
+        icon={CachedIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
@@ -52,16 +56,17 @@ const PreviewStatus: React.FC = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <ResourceInputs />
             <ApiUrlDisplay
-              method="GET"
-              url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              method="POST"
+              url={`https://admin.hlx.page/cache/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
+              color="warning"
               type="submit"
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Check Preview Status
+              Purge Live Cache
             </Button>
           </Box>
         </Form>
@@ -77,7 +82,7 @@ const PreviewStatus: React.FC = () => {
       />
 
       {status && (
-        <StatusResponseDisplay
+        <ResponseDisplay
           requestDetails={requestDetails}
           responseData={responseData}
           responseStatus={status}
@@ -87,5 +92,4 @@ const PreviewStatus: React.FC = () => {
   );
 };
 
-export default PreviewStatus;
-
+export default CachePurgeLive; 

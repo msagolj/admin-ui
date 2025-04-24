@@ -43,11 +43,34 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import TokenInputModal from './TokenInputModal';
 
 const drawerWidth = 280;
+
+const existingRoutes = [
+  '/status/general',
+  '/status/bulk',
+  '/preview/status',
+  '/preview/update',
+  '/preview/delete',
+  '/preview/bulk',
+  '/publish/status',
+  '/publish/resource',
+  '/publish/unpublish',
+  '/publish/bulk',
+  '/code/status',
+  '/code/update',
+  '/code/delete',
+  '/cache/purge',
+  '/index/status',
+  '/index/reindex',
+  '/index/remove',
+  '/org-config/read',
+  '/site-config/list',
+  '/site-config/read'
+];
 
 interface SubMenuItem {
   text: string;
@@ -80,18 +103,8 @@ const menuGroups: MenuGroup[] = [
         text: 'Status',
         icon: <CheckCircleIcon />,
         subItems: [
-          { text: 'General Status', path: '/status', method: 'GET' },
+          { text: 'General Status', path: '/status/general', method: 'GET' },
           { text: 'Bulk Status Job', path: '/status/bulk', method: 'POST' }
-        ]
-      },
-      {
-        text: 'Publish',
-        icon: <CloudUploadIcon />,
-        subItems: [
-          { text: 'Publish Status', path: '/publish/status', method: 'GET' },
-          { text: 'Publish Resource', path: '/publish', method: 'POST' },
-          { text: 'Un-publish Resource', path: '/unpublish', method: 'DELETE' },
-          { text: 'Bulk Publish Job', path: '/publish/bulk', method: 'POST' }
         ]
       },
       {
@@ -105,10 +118,20 @@ const menuGroups: MenuGroup[] = [
         ]
       },
       {
+        text: 'Publish',
+        icon: <CloudUploadIcon />,
+        subItems: [
+          { text: 'Publish Status', path: '/publish/status', method: 'GET' },
+          { text: 'Publish Resource', path: '/publish/resource', method: 'POST' },
+          { text: 'Un-publish Resource', path: '/publish/unpublish', method: 'DELETE' },
+          { text: 'Bulk Publish Job', path: '/publish/bulk', method: 'POST' }
+        ]
+      },
+      {
         text: 'Code',
         icon: <CodeIcon />,
         subItems: [
-          { text: 'Code Bus Status', path: '/code/status', method: 'GET' },
+          { text: 'Code Status', path: '/code/status', method: 'GET' },
           { text: 'Update Code', path: '/code/update', method: 'POST' },
           { text: 'Delete Code', path: '/code/delete', method: 'DELETE' },
           { text: 'Batch Update Code', path: '/code/batch', method: 'POST' }
@@ -195,10 +218,10 @@ const menuGroups: MenuGroup[] = [
         text: 'Org Config',
         icon: <BusinessIcon />,
         subItems: [
-          { text: 'Read Config', path: '/org-config/read', method: 'GET' },
-          { text: 'Update Config', path: '/org-config/update', method: 'POST' },
-          { text: 'Create Config', path: '/org-config/create', method: 'PUT' },
-          { text: 'Delete Config', path: '/org-config/delete', method: 'DELETE' },
+          { text: 'Read Org Config', path: '/org-config/read', method: 'GET' },
+          { text: 'Update Org Config', path: '/org-config/update', method: 'POST' },
+          { text: 'Create Org Config', path: '/org-config/create', method: 'PUT' },
+          { text: 'Delete Org Config', path: '/org-config/delete', method: 'DELETE' },
           { text: 'List Users', path: '/org-config/users/list', method: 'GET' },
           { text: 'Create User', path: '/org-config/users/create', method: 'POST' },
           { text: 'Read User', path: '/org-config/users/read', method: 'GET' },
@@ -213,11 +236,11 @@ const menuGroups: MenuGroup[] = [
         text: 'Site Config',
         icon: <SettingsIcon />,
         subItems: [
-          { text: 'List Config', path: '/site-config/list', method: 'GET' },
-          { text: 'Read Config', path: '/site-config/read', method: 'GET' },
-          { text: 'Update Config', path: '/site-config/update', method: 'POST' },
-          { text: 'Create Config', path: '/site-config/create', method: 'PUT' },
-          { text: 'Delete Config', path: '/site-config/delete', method: 'DELETE' },
+          { text: 'List Sites', path: '/site-config/list', method: 'GET' },
+          { text: 'Read Site Config', path: '/site-config/read', method: 'GET' },
+          { text: 'Update Site Config', path: '/site-config/update', method: 'POST' },
+          { text: 'Create Site Config', path: '/site-config/create', method: 'PUT' },
+          { text: 'Delete Site Config', path: '/site-config/delete', method: 'DELETE' },
           { text: 'Read Robots.txt', path: '/site-config/robots/read', method: 'GET' },
           { text: 'Update Robots.txt', path: '/site-config/robots/update', method: 'POST' },
           { text: 'List Access Tokens', path: '/site-config/tokens/list', method: 'GET' },
@@ -235,13 +258,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['Authoring and Publishing']);
   const [expandedSubMenus, setExpandedSubMenus] = useState<string[]>([]);
-  const [loginAnchorEl, setLoginAnchorEl] = useState<null | HTMLElement>(null);
-  const [loadingLoginOptions, setLoadingLoginOptions] = useState(false);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
-  const { isAuthenticated, loginOptions, login, logout, fetchLoginOptions, handleTokenSubmit: submitToken } = useAuth();
+  const location = useLocation();
+  const { handleTokenSubmit: submitToken } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -263,20 +285,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     );
   };
 
-  const handleLoginClick = async (event: React.MouseEvent<HTMLElement>) => {
-    setLoginAnchorEl(event.currentTarget);
-    setLoadingLoginOptions(true);
-    await fetchLoginOptions();
-    setLoadingLoginOptions(false);
-  };
-
-  const handleLoginClose = () => {
-    setLoginAnchorEl(null);
-  };
-
-  const handleLoginOptionClick = (url: string) => {
-    handleLoginClose();
-    login(url);
+  const handleSettingsClick = () => {
     setShowTokenModal(true);
   };
 
@@ -284,9 +293,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setShowTokenModal(false);
   };
 
-  const handleTokenSubmit = (token: string) => {
-    submitToken(token);
+  const handleTokenSubmit = (token: string, aemToken: string) => {
+    submitToken(token, aemToken);
     handleTokenModalClose();
+  };
+
+  const isActivePath = (path?: string) => {
+    if (!path) return false;
+    return location.pathname === path;
+  };
+
+  const isRouteExists = (path?: string) => {
+    if (!path) return false;
+    return existingRoutes.includes(path);
   };
 
   const drawer = (
@@ -370,16 +389,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <ListItem key={subItem.text} disablePadding>
                               <ListItemButton
                                 onClick={() => {
-                                  if (subItem.path) {
+                                  if (subItem.path && isRouteExists(subItem.path)) {
                                     navigate(subItem.path);
                                   }
                                   if (isMobile) {
                                     setMobileOpen(false);
                                   }
                                 }}
+                                disabled={!isRouteExists(subItem.path)}
                                 sx={{
                                   px: 0,
                                   pl: 2,
+                                  backgroundColor: isActivePath(subItem.path) ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+                                  '&:hover': {
+                                    backgroundColor: isActivePath(subItem.path) 
+                                      ? 'rgba(25, 118, 210, 0.12)' 
+                                      : 'rgba(0, 0, 0, 0.04)',
+                                  },
+                                  '&.Mui-disabled': {
+                                    opacity: 0.5,
+                                  },
                                 }}
                               >
                                 <Tooltip title={subItem.method}>
@@ -403,10 +432,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                         subItem.method === 'POST' ? 'primary.main' :
                                         subItem.method === 'DELETE' ? 'error.main' :
                                         'warning.main',
+                                      opacity: isRouteExists(subItem.path) ? 1 : 0.5,
                                     }}
                                   />
                                 </Tooltip>
-                                <ListItemText primary={subItem.text} />
+                                <ListItemText 
+                                  primary={subItem.text}
+                                  sx={{
+                                    color: isActivePath(subItem.path) ? 'primary.main' : 'inherit',
+                                    fontWeight: isActivePath(subItem.path) ? 600 : 400,
+                                    opacity: isRouteExists(subItem.path) ? 1 : 0.5,
+                                  }}
+                                />
                               </ListItemButton>
                             </ListItem>
                           ))}
@@ -417,13 +454,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <ListItem key={item.text} disablePadding>
                       <ListItemButton
                         onClick={() => {
-                          if (item.path) {
+                          if (item.path && isRouteExists(item.path)) {
                             navigate(item.path);
                           }
                           if (isMobile) {
                             setMobileOpen(false);
                           }
                         }}
+                        disabled={!isRouteExists(item.path)}
                         sx={{
                           px: 0,
                           '& .MuiListItemIcon-root': {
@@ -434,10 +472,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             mr: 0,
                             pr: 0.5,
                           },
+                          backgroundColor: item.path ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.08)' : 'transparent') : 'transparent',
+                          '&:hover': {
+                            backgroundColor: item.path 
+                              ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0, 0, 0, 0.04)')
+                              : 'rgba(0, 0, 0, 0.04)',
+                          },
+                          '&.Mui-disabled': {
+                            opacity: 0.5,
+                          },
                         }}
                       >
                         <ListItemIcon>{item.icon}</ListItemIcon>
-                        <ListItemText primary={item.text} />
+                        <ListItemText 
+                          primary={item.text}
+                          sx={{
+                            color: item.path ? (isActivePath(item.path) ? 'primary.main' : 'inherit') : 'inherit',
+                            fontWeight: item.path ? (isActivePath(item.path) ? 600 : 400) : 400,
+                            opacity: isRouteExists(item.path) ? 1 : 0.5,
+                          }}
+                        />
                       </ListItemButton>
                     </ListItem>
                   )}
@@ -492,68 +546,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             AEM Admin API Dashboard
           </Typography>
-          {isAuthenticated ? (
-            <Button
-              color="inherit"
-              startIcon={<LoginIcon />}
-              onClick={logout}
-              sx={{ ml: 2 }}
-            >
-              Logout
-            </Button>
-          ) : (
-            <>
-              <Button
-                color="inherit"
-                startIcon={<LoginIcon />}
-                onClick={handleLoginClick}
-                sx={{ ml: 2 }}
-              >
-                Login
-              </Button>
-              <Menu
-                anchorEl={loginAnchorEl}
-                open={Boolean(loginAnchorEl)}
-                onClose={handleLoginClose}
-                PaperProps={{
-                  sx: {
-                    minWidth: 200,
-                  },
-                }}
-              >
-                {loadingLoginOptions ? (
-                  <MenuItem disabled>
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                      <CircularProgress size={20} />
-                    </Box>
-                  </MenuItem>
-                ) : loginOptions.length > 0 ? (
-                  loginOptions.map((option) => (
-                    <MenuItem 
-                      key={option.url} 
-                      onClick={() => handleLoginOptionClick(option.url)}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {option.icon && (
-                          <Box
-                            component="img"
-                            src={option.icon}
-                            alt={`${option.name} icon`}
-                            sx={{ width: 20, height: 20 }}
-                          />
-                        )}
-                        {option.name}
-                      </Box>
-                    </MenuItem>
-                  ))
-                ) : (
-                  <MenuItem disabled>
-                    No login options available
-                  </MenuItem>
-                )}
-              </Menu>
-            </>
-          )}
+          <Button
+            color="inherit"
+            startIcon={<SettingsIcon />}
+            onClick={handleSettingsClick}
+            sx={{ ml: 2 }}
+          >
+            Settings
+          </Button>
         </Toolbar>
       </AppBar>
       <Box

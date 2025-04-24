@@ -6,19 +6,11 @@ import {
   Tooltip,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import TerminalIcon from '@mui/icons-material/Terminal';
 import MethodBadge from './MethodBadge';
 
-interface ApiUrlDisplayProps {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-  url: string;
-  queryParams?: Record<string, string>;
-  body?: any;
-}
 
-const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url, queryParams, body }) => {
+const ApiUrlDisplay: React.FC<{ method: 'GET' | 'POST' | 'PUT' | 'DELETE'; url: string }> = ({ method, url }) => {
   const [copySuccess, setCopySuccess] = useState(false);
-  const [copyCurlSuccess, setCopyCurlSuccess] = useState(false);
 
   const handleCopyUrl = async () => {
     try {
@@ -27,22 +19,6 @@ const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url, queryParams,
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error('Failed to copy URL:', err);
-    }
-  };
-
-  const copyCurl = async () => {
-    const token = localStorage.getItem('authToken');
-    const headers = token ? `-H 'x-auth-token: ${token}'` : '';
-    const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
-    const bodyString = body ? `-d '${JSON.stringify(body)}'` : '';
-    const curlCommand = `curl -v -X ${method} ${headers} '${url}${queryString}' ${bodyString}`;
-    
-    try {
-      await navigator.clipboard.writeText(curlCommand);
-      setCopyCurlSuccess(true);
-      setTimeout(() => setCopyCurlSuccess(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy curl command:', err);
     }
   };
 
@@ -81,20 +57,6 @@ const ApiUrlDisplay: React.FC<ApiUrlDisplayProps> = ({ method, url, queryParams,
             }}
           >
             <ContentCopyIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title={copyCurlSuccess ? "Copied!" : "Copy as cURL"}>
-          <IconButton 
-            size="small" 
-            onClick={copyCurl}
-            color={copyCurlSuccess ? "success" : "default"}
-            sx={{ 
-              '&:hover': { 
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              }
-            }}
-          >
-            <TerminalIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>

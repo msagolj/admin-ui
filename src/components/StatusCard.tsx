@@ -1,28 +1,16 @@
 import { Card, CardContent, Typography, Box } from '@mui/material';
-import { formatDate } from '../utils/dateUtils';
+import { renderValue, formatLabel } from '../utils/renderUtils';
 
 interface StatusCardProps {
   title: string;
   status: number;
-  url?: string;
-  lastModified?: string;
-  lastModifiedBy?: string;
-  contentBusId?: string;
-  sourceLocation?: string;
-  sourceLastModified?: string;
-  permissions?: string[];
+  data: Record<string, any>;
 }
 
 const StatusCard = ({
   title,
   status,
-  url,
-  lastModified,
-  lastModifiedBy,
-  contentBusId,
-  sourceLocation,
-  sourceLastModified,
-  permissions,
+  data
 }: StatusCardProps) => {
   const getStatusColor = (status: number) => {
     if (status >= 200 && status < 300) return 'success';
@@ -33,7 +21,7 @@ const StatusCard = ({
   };
 
   return (
-    <Card sx={{ mb: 2 }}>
+    <Card sx={{ mb: 2, border: 1, borderColor: 'grey.300' }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Typography
@@ -60,76 +48,19 @@ const StatusCard = ({
             {title}
           </Typography>
         </Box>
-        {url && (
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              URL
-            </Typography>
-            <Typography variant="body2">
-              {url}
-            </Typography>
-          </Box>
-        )}
-        {lastModified && (
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              Last Modified
-            </Typography>
-            <Typography variant="body2">
-              {formatDate(lastModified)}
-            </Typography>
-          </Box>
-        )}
-        {lastModifiedBy && (
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              Last Modified By
-            </Typography>
-            <Typography variant="body2">
-              {lastModifiedBy}
-            </Typography>
-          </Box>
-        )}
-        {contentBusId && (
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              Content Bus ID
-            </Typography>
-            <Typography variant="body2">
-              {contentBusId}
-            </Typography>
-          </Box>
-        )}
-        {sourceLocation && (
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              Source Location
-            </Typography>
-            <Typography variant="body2">
-              {sourceLocation}
-            </Typography>
-          </Box>
-        )}
-        {sourceLastModified && (
-          <Box sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              Source Last Modified
-            </Typography>
-            <Typography variant="body2">
-              {formatDate(sourceLastModified)}
-            </Typography>
-          </Box>
-        )}
-        {permissions && permissions.length > 0 && (
-          <Box>
-            <Typography variant="caption" sx={{ fontWeight: 'bold', display: 'block', mb: 0.25, color: 'text.secondary' }}>
-              Permissions
-            </Typography>
-            <Typography variant="body2">
-              {permissions.join(', ')}
-            </Typography>
-          </Box>
-        )}
+        {Object.entries(data).map(([key, value]) => {
+          if (key === 'status' || key === 'links') return null;
+          return (
+            <Box key={key} sx={{ mb: 1 }}>
+              <Typography variant="body2" color="text.primary" sx={{ fontWeight: 'bold' }}>
+                {formatLabel(key)}
+              </Typography>
+              <Typography variant="body2">
+                {renderValue(key, value)}
+              </Typography>
+            </Box>
+          );
+        })}
       </CardContent>
     </Card>
   );

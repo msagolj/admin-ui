@@ -5,16 +5,17 @@ import {
   Button,
   CircularProgress
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
+import ResponseDisplay from '../components/ResponseDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 
-const PreviewStatus: React.FC = () => {
+const PreviewDelete: React.FC = () => {
   const { owner, repo, ref, path } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
   const [requestDetails, setRequestDetails] = useState<{
@@ -29,7 +30,7 @@ const PreviewStatus: React.FC = () => {
     e.preventDefault();
     const details = {
       url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`,
-      method: 'GET',
+      method: 'DELETE',
       headers: {},
       queryParams: {},
       body: null,
@@ -41,9 +42,9 @@ const PreviewStatus: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title="Preview Status"
-        description="Returns the preview status of the respective resource."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/preview/operation/previewStatus"
+        title="Delete Preview"
+        description="Deletes a preview resource from the preview partition in the content-bus."
+        helpUrl="https://www.aem.live/docs/admin.html#tag/preview/operation/deletePreview"
         icon={PreviewIcon}
       />
 
@@ -52,16 +53,17 @@ const PreviewStatus: React.FC = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <ResourceInputs />
             <ApiUrlDisplay
-              method="GET"
+              method="DELETE"
               url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
+              color="error"
               type="submit"
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Check Preview Status
+              Delete Preview
             </Button>
           </Box>
         </Form>
@@ -77,7 +79,7 @@ const PreviewStatus: React.FC = () => {
       />
 
       {status && (
-        <StatusResponseDisplay
+        <ResponseDisplay
           requestDetails={requestDetails}
           responseData={responseData}
           responseStatus={status}
@@ -87,5 +89,5 @@ const PreviewStatus: React.FC = () => {
   );
 };
 
-export default PreviewStatus;
+export default PreviewDelete;
 

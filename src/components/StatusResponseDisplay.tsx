@@ -5,15 +5,13 @@ import {
   Typography,
   Button,
   ButtonGroup,
-  Divider,
-  Link
+  Divider
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import RequestDisplay from './RequestDisplay';
 import StatusCard from './StatusCard';
-import { formatLabel, renderValue } from '../utils/renderUtils';
 
-const ResponseDisplay: React.FC<{
+const StatusResponseDisplay: React.FC<{
   requestDetails: any;
   responseData: any;
   responseStatus: number;
@@ -21,24 +19,26 @@ const ResponseDisplay: React.FC<{
   const { requestDetails, responseData, responseStatus } = props;
   const [showRaw, setShowRaw] = useState(false);
 
-  const ignoreKeys = ["links"];
+  const statusCards = ["live", "preview", "code", "edit", "job"];
 
-  const renderResponse = (data: any): React.ReactNode => {
-    // if the response has no data e.g. 204 No Content
-    if (Object.keys(data).length === 0) return (
-      <StatusCard
-        title="No Content"
-        status={responseStatus}
-        data={{}}
-      />
-    );
-    return (
-      <StatusCard
-          title=""
-          status= {responseStatus}
-          data={data}
-        />
-    );
+  const renderStatusCards = (data: any): React.ReactNode => {
+
+    return Object.entries(data).map(([key, value]) => {
+      // Check if the value is a non-null object and its 
+      // key exists in statusCards array and has properties
+      if (typeof value === 'object' && value !== null && 
+          statusCards.includes(key) && Object.keys(value).length > 0) {
+        return (
+          <StatusCard
+            key={key}
+            title={key.charAt(0).toUpperCase() + key.slice(1)}
+            status={data[key].status ? data[key].status : responseStatus}
+            data={data[key]}
+          />
+        );
+      }
+      return null;
+    });
   };
 
   return (
@@ -64,17 +64,15 @@ const ResponseDisplay: React.FC<{
         </Box>
       </Box>
 
-
-        {showRaw ? (
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-            {JSON.stringify(responseData, null, 2)}
-          </pre>
-        ) : (
-          renderResponse(responseData)
-        )}
-
+      {showRaw ? (
+        <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+          {JSON.stringify(responseData, null, 2)}
+        </pre>
+      ) : (
+        renderStatusCards(responseData)
+      )}
     </Box>
   );
 };
 
-export default ResponseDisplay; 
+export default StatusResponseDisplay; 

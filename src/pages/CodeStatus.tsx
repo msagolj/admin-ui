@@ -5,16 +5,16 @@ import {
   Button,
   CircularProgress
 } from '@mui/material';
-import PreviewIcon from '@mui/icons-material/Preview';
+import CodeIcon from '@mui/icons-material/Code';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
+import StatusResponseDisplay from '../components/StatusResponseDisplay';
 import Form, { useFormState } from '../components/Form';
 
-const PreviewStatus: React.FC = () => {
+const CodeStatus: React.FC = () => {
   const { owner, repo, ref, path } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
   const [requestDetails, setRequestDetails] = useState<{
@@ -28,11 +28,11 @@ const PreviewStatus: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`,
+      url: `https://admin.hlx.page/code/${owner}/${repo}/${ref}/${path}`,
       method: 'GET',
       headers: {},
       queryParams: {},
-      body: null,
+      body: null
     };
     setRequestDetails(details);
     executeSubmit(details);
@@ -41,10 +41,10 @@ const PreviewStatus: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title="Preview Status"
-        description="Returns the preview status of the respective resource."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/preview/operation/previewStatus"
-        icon={PreviewIcon}
+        title="Code Status"
+        description="Returns the code bus status of the respective resource. This shows the status of code files in the repository."
+        helpUrl="https://www.aem.live/docs/admin.html#tag/code/operation/codeStatus"
+        icon={CodeIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
@@ -53,7 +53,7 @@ const PreviewStatus: React.FC = () => {
             <ResourceInputs />
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`https://admin.hlx.page/code/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
@@ -61,7 +61,7 @@ const PreviewStatus: React.FC = () => {
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Check Preview Status
+              Check Code Status
             </Button>
           </Box>
         </Form>
@@ -87,5 +87,4 @@ const PreviewStatus: React.FC = () => {
   );
 };
 
-export default PreviewStatus;
-
+export default CodeStatus; 

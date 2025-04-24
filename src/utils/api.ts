@@ -1,35 +1,39 @@
-import { useAuth } from '../context/AuthContext';
 import { ApiError } from './errorUtils';
 
-interface ApiResponse<T> {
-  data: T;
-  status: number;
-  statusText: string;
-}
-
-export async function apiCall<T>(
-  url: string,
-  options: RequestInit = {}
-): Promise<{ data: T }> {
+export async function apiCall(
+  requestDetails: any
+): Promise<{ status: number, responseData: any}> {
   const token = localStorage.getItem('authToken');
-  
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token && { 'x-auth-token': token }),
-    ...options.headers,
+
+  // Add tokens to requestDetails.headers
+  requestDetails.headers = {
+    'content-type': 'application/json',
+    ...(token && { 
+      'x-auth-token': token
+    }),
+    ...requestDetails.headers,
   };
+  
+  // Extract just the path part from the URL
+  const urlPath = requestDetails.url.replace('https://admin.hlx.page', '');
+  
+  // Use proxy URL in development
+  const baseUrl = process.env.NODE_ENV === 'development' ? '/api' : '';
+  // Ensure we have a single leading slash
+  const cleanPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
+  const fullUrl = `${baseUrl}${cleanPath}`;
 
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers,
+    const response = await fetch(fullUrl, {
+      method: requestDetails.method,
+      headers: requestDetails.headers,
       credentials: 'include',
       mode: 'cors',
+      ...(requestDetails.body && { body: JSON.stringify(requestDetails.body) })
     });
 
     if (!response.ok) {
       const errorMessage = await response.text();
-      console.log(response.headers.get('x-error-code'))
       const errorHeaders = {
         errorCode: response.headers.get('x-error-code'),
         error: response.headers.get('x-error'),
@@ -37,8 +41,18 @@ export async function apiCall<T>(
       throw new ApiError(errorMessage, response.status, errorHeaders);
     }
 
-    const data = await response.json();
-    return { data };
+    // For 204 responses, return empty data
+    if (response.status === 204) {
+      return { status: 204, responseData: {} };
+    }
+    // some api calls return no data (eg. purge live cache), so we need to handle that
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.warn('Response could not be parsed as JSON:', e);
+    }
+    return { status: response.status, responseData: data};
   } catch (err) {
     if (err instanceof ApiError) {
       throw err;

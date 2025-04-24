@@ -3,7 +3,9 @@ import {
   Box,
   Paper,
   Button,
-  CircularProgress
+  CircularProgress,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useResource } from '../context/ResourceContext';
@@ -14,9 +16,9 @@ import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 
-const PublishStatus: React.FC = () => {
+const PublishResource: React.FC = () => {
   const { owner, repo, ref, path } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit } = useFormState();
   const [requestDetails, setRequestDetails] = useState<{
     url: string;
     method: string;
@@ -25,14 +27,21 @@ const PublishStatus: React.FC = () => {
     body: any;
   } | null>(null);
 
+  // Additional parameters for the request
+  const [forceUpdateRedirects, setForceUpdateRedirects] = useState(false);
+  const [disableNotifications, setDisableNotifications] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
       url: `https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`,
-      method: 'GET',
+      method: 'POST',
       headers: {},
       queryParams: {},
-      body: null,
+      body: {
+        forceUpdateRedirects,
+        disableNotifications
+      }
     };
     setRequestDetails(details);
     executeSubmit(details);
@@ -41,18 +50,36 @@ const PublishStatus: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title="Publish Status"
-        description="Returns the publish status of the respective resource."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/publish"
-        icon={CloudUploadIcon}    
+        title="Publish Resource"
+        description="Publishes a resource by copying the resource content from the preview content-bus partition to the live content-bus partition. It additionally purges the live cdn and the byo cdn, if configured."
+        helpUrl="https://www.aem.live/docs/admin.html#tag/publish/operation/publishResource"
+        icon={CloudUploadIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
         <Form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <ResourceInputs />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={forceUpdateRedirects}
+                  onChange={(e) => setForceUpdateRedirects(e.target.checked)}
+                />
+              }
+              label="Force update of redirects (only applies when publishing redirects.json)"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={disableNotifications}
+                  onChange={(e) => setDisableNotifications(e.target.checked)}
+                />
+              }
+              label="Disable notifications for affected resources"
+            />
             <ApiUrlDisplay
-              method="GET"
+              method="POST"
               url={`https://admin.hlx.page/live/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
@@ -61,7 +88,7 @@ const PublishStatus: React.FC = () => {
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Check Publish Status
+              Publish Resource
             </Button>
           </Box>
         </Form>
@@ -69,10 +96,7 @@ const PublishStatus: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => {}}
         requestDetails={requestDetails}
       />
 
@@ -87,4 +111,4 @@ const PublishStatus: React.FC = () => {
   );
 };
 
-export default PublishStatus; 
+export default PublishResource; 

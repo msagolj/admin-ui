@@ -3,19 +3,19 @@ import {
   Box,
   Paper,
   Button,
-  CircularProgress
+  CircularProgress,
+  TextField
 } from '@mui/material';
-import PreviewIcon from '@mui/icons-material/Preview';
+import BusinessIcon from '@mui/icons-material/Business';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
-import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import ResponseDisplay from 'components/ResponseDisplay';
 
-const PreviewStatus: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
+const OrgConfigReadConfig: React.FC = () => {
+  const { owner, setOwner } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
   const [requestDetails, setRequestDetails] = useState<{
     url: string;
@@ -28,11 +28,11 @@ const PreviewStatus: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`,
+      url: `https://admin.hlx.page/config/${owner}.json`,
       method: 'GET',
       headers: {},
       queryParams: {},
-      body: null,
+      body: null
     };
     setRequestDetails(details);
     executeSubmit(details);
@@ -41,19 +41,27 @@ const PreviewStatus: React.FC = () => {
   return (
     <Box>
       <PageHeader
-        title="Preview Status"
-        description="Returns the preview status of the respective resource."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/preview/operation/previewStatus"
-        icon={PreviewIcon}
+        title="Read Org Config"
+        description="Returns the organization configuration for the specified organization."
+        helpUrl="https://www.aem.live/docs/admin.html#tag/orgConfig/operation/getConfigOrg"
+        icon={BusinessIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
         <Form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <ResourceInputs />
+            <TextField
+              fullWidth
+              label="Organization"
+              value={owner}
+              onChange={(e) => setOwner(e.target.value)}
+              required
+              placeholder="Organization name"
+              helperText="Name of the organization"
+            />
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`https://admin.hlx.page/config/${owner || '{org}'}.json`}
             />
             <Button
               variant="contained"
@@ -61,7 +69,7 @@ const PreviewStatus: React.FC = () => {
               disabled={loading}
               startIcon={loading ? <CircularProgress size={20} /> : null}
             >
-              Check Preview Status
+              Read Config
             </Button>
           </Box>
         </Form>
@@ -77,7 +85,7 @@ const PreviewStatus: React.FC = () => {
       />
 
       {status && (
-        <StatusResponseDisplay
+        <ResponseDisplay
           requestDetails={requestDetails}
           responseData={responseData}
           responseStatus={status}
@@ -87,5 +95,4 @@ const PreviewStatus: React.FC = () => {
   );
 };
 
-export default PreviewStatus;
-
+export default OrgConfigReadConfig; 

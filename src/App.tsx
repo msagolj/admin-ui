@@ -3,29 +3,28 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/Layout';
-import Status from './pages/Status';
-import PublishStatus from './pages/PublishStatus';
-import Publish from './pages/Publish';
-import Unpublish from './pages/Unpublish';
-import PreviewStatus from './pages/PreviewStatus';
-import UpdatePreview from './pages/UpdatePreview';
-import DeletePreview from './pages/DeletePreview';
-import BulkPreviewJob from './pages/BulkPreviewJob';
-import BulkPublishJob from './pages/BulkPublishJob';
-import BulkUnpublishJob from './pages/BulkUnpublishJob';
-import BulkStatusJob from './pages/BulkStatusJob';
-import Code from './pages/Code';
-import Cache from './pages/Cache';
-import Index from './pages/Index';
-import Sitemap from './pages/Sitemap';
-import Snapshot from './pages/Snapshot';
-import Login from './pages/Login';
-import Logs from './pages/Logs';
-import Jobs from './pages/Jobs';
-import OrgConfig from './pages/OrgConfig';
-import SiteConfig from './pages/SiteConfig';
 import { ResourceProvider } from './context/ResourceContext';
 import { AuthProvider } from './context/AuthContext';
+import StatusGeneralStatus from './pages/StatusGeneralStatus';
+import StatusBulkJob from './pages/StatusBulkJob';
+import StatusIndex from './pages/IndexStatus';
+import IndexReindex from './pages/IndexReindex';
+import IndexRemoveResource from './pages/IndexRemoveResource';
+import OrgConfigReadConfig from './pages/OrgConfigReadConfig';
+import SiteConfigListConfig from './pages/SiteConfigListConfig';
+import SiteConfigReadConfig from './pages/SiteConfigReadConfig';
+import PreviewStatus from './pages/PreviewStatus';
+import PreviewUpdate from './pages/PreviewUpdate';
+import PreviewDelete from './pages/PreviewDelete';
+import PreviewBulkJob from './pages/PreviewBulkJob';
+import PublishStatus from './pages/PublishStatus';
+import PublishResource from './pages/PublishResource';
+import PublishUnpublish from './pages/PublishUnpublish';
+import PublishBulkJob from './pages/PublishBulkJob';
+import CodeStatus from './pages/CodeStatus';
+import CodeUpdate from './pages/CodeUpdate';
+import CodeDelete from './pages/CodeDelete';
+import CachePurgeLive from './pages/CachePurgeLive';
 
 const theme = createTheme({
   palette: {
@@ -48,70 +47,27 @@ const App: React.FC = () => {
           <Router>
             <Layout>
               <Routes>
-                <Route path="/" element={<Navigate to="/status" replace />} />
-                <Route path="/status" element={<Status />} />
-                <Route path="/status/bulk" element={<BulkStatusJob />} />
-                <Route path="/publish/status" element={<PublishStatus />} />
-                <Route path="/publish" element={<Publish />} />
-                <Route path="/unpublish" element={<Unpublish />} />
-                <Route path="/publish/bulk" element={<BulkPublishJob />} />
+                <Route path="/" element={<Navigate to="/status/general" replace />} />
+                <Route path="/status/general" element={<StatusGeneralStatus />} />
+                <Route path="/status/bulk" element={<StatusBulkJob />} />
+                <Route path="/index/status" element={<StatusIndex />} />
+                <Route path="/index/reindex" element={<IndexReindex />} />
+                <Route path="/index/remove" element={<IndexRemoveResource />} />
+                <Route path="/org-config/read" element={<OrgConfigReadConfig />} />
+                <Route path="/site-config/list" element={<SiteConfigListConfig />} />
+                <Route path="/site-config/read" element={<SiteConfigReadConfig />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
-                <Route path="/preview/update" element={<UpdatePreview />} />
-                <Route path="/preview/delete" element={<DeletePreview />} />
-                <Route path="/preview/bulk" element={<BulkPreviewJob />} />
-                <Route path="/code/status" element={<Code />} />
-                <Route path="/code/update" element={<Code />} />
-                <Route path="/code/delete" element={<Code />} />
-                <Route path="/code/batch" element={<Code />} />
-                <Route path="/cache/purge" element={<Cache />} />
-                <Route path="/index/status" element={<Index />} />
-                <Route path="/index/reindex" element={<Index />} />
-                <Route path="/index/remove" element={<Index />} />
-                <Route path="/sitemap/generate" element={<Sitemap />} />
-                <Route path="/snapshot/list" element={<Snapshot />} />
-                <Route path="/snapshot/manifest" element={<Snapshot />} />
-                <Route path="/snapshot/manifest/update" element={<Snapshot />} />
-                <Route path="/snapshot/status" element={<Snapshot />} />
-                <Route path="/snapshot/add" element={<Snapshot />} />
-                <Route path="/snapshot/delete" element={<Snapshot />} />
-                <Route path="/snapshot/bulk" element={<Snapshot />} />
-                <Route path="/snapshot/publish/resource" element={<Snapshot />} />
-                <Route path="/snapshot/publish" element={<Snapshot />} />
-                <Route path="/snapshot/review" element={<Snapshot />} />
-                <Route path="/auth/login" element={<Login />} />
-                <Route path="/auth/auto" element={<Login />} />
-                <Route path="/auth/logout" element={<Login />} />
-                <Route path="/auth/profile" element={<Login />} />
-                <Route path="/logs/get" element={<Logs />} />
-                <Route path="/logs/add" element={<Logs />} />
-                <Route path="/jobs/list" element={<Jobs />} />
-                <Route path="/jobs/status" element={<Jobs />} />
-                <Route path="/jobs/stop" element={<Jobs />} />
-                <Route path="/jobs/details" element={<Jobs />} />
-                <Route path="/org-config/read" element={<OrgConfig />} />
-                <Route path="/org-config/update" element={<OrgConfig />} />
-                <Route path="/org-config/create" element={<OrgConfig />} />
-                <Route path="/org-config/delete" element={<OrgConfig />} />
-                <Route path="/org-config/users/list" element={<OrgConfig />} />
-                <Route path="/org-config/users/create" element={<OrgConfig />} />
-                <Route path="/org-config/users/read" element={<OrgConfig />} />
-                <Route path="/org-config/users/delete" element={<OrgConfig />} />
-                <Route path="/org-config/secrets/list" element={<OrgConfig />} />
-                <Route path="/org-config/secrets/create" element={<OrgConfig />} />
-                <Route path="/org-config/secrets/read" element={<OrgConfig />} />
-                <Route path="/org-config/secrets/delete" element={<OrgConfig />} />
-                <Route path="/site-config/list" element={<SiteConfig />} />
-                <Route path="/site-config/read" element={<SiteConfig />} />
-                <Route path="/site-config/update" element={<SiteConfig />} />
-                <Route path="/site-config/create" element={<SiteConfig />} />
-                <Route path="/site-config/delete" element={<SiteConfig />} />
-                <Route path="/site-config/robots/read" element={<SiteConfig />} />
-                <Route path="/site-config/robots/update" element={<SiteConfig />} />
-                <Route path="/site-config/tokens/list" element={<SiteConfig />} />
-                <Route path="/site-config/tokens/create" element={<SiteConfig />} />
-                <Route path="/site-config/tokens/read" element={<SiteConfig />} />
-                <Route path="/site-config/tokens/delete" element={<SiteConfig />} />
-                <Route path="/site-config/secrets/list" element={<SiteConfig />} />
+                <Route path="/preview/update" element={<PreviewUpdate />} />
+                <Route path="/preview/delete" element={<PreviewDelete />} />
+                <Route path="/preview/bulk" element={<PreviewBulkJob />} />
+                <Route path="/publish/status" element={<PublishStatus />} />
+                <Route path="/publish/resource" element={<PublishResource />} />
+                <Route path="/publish/unpublish" element={<PublishUnpublish />} />
+                <Route path="/publish/bulk" element={<PublishBulkJob />} />
+                <Route path="/code/status" element={<CodeStatus />} />
+                <Route path="/code/update" element={<CodeUpdate />} />
+                <Route path="/code/delete" element={<CodeDelete />} />
+                <Route path="/cache/purge" element={<CachePurgeLive />} />
               </Routes>
             </Layout>
           </Router>

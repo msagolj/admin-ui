@@ -12,14 +12,14 @@ interface AuthContextType {
   login: (url: string) => void;
   logout: () => void;
   fetchLoginOptions: () => Promise<void>;
-  handleTokenSubmit: (token: string) => void;
+  handleTokenSubmit: (token: string, aemToken: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -29,13 +29,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginOptions, setLoginOptions] = useState<LoginOption[]>([]);
   const [token, setToken] = useState<string | null>(null);
+  const [aemToken, setAemToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for stored token on mount
+    // Check for stored tokens on mount
     const storedToken = localStorage.getItem('authToken');
+    const storedAemToken = localStorage.getItem('aemToken');
     if (storedToken) {
       setToken(storedToken);
       setIsAuthenticated(true);
+    }
+    if (storedAemToken) {
+      setAemToken(storedAemToken);
     }
   }, []);
 
@@ -53,10 +58,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       const data = await response.json();
-      console.log('Login options response:', data); // Debug log
       
       if (!data.links) {
-        console.error('No links found in response:', data);
         setLoginOptions([]);
         return;
       }
@@ -84,7 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
         });
       
-      console.log('Processed login options:', options); // Debug log
       setLoginOptions(options);
     } catch (error) {
       console.error('Failed to fetch login options:', error);
@@ -97,15 +99,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     window.open(url, 'login', 'width=600,height=800');
   };
 
-  const handleTokenSubmit = (newToken: string) => {
+  const handleTokenSubmit = (newToken: string, newAemToken: string) => {
     setToken(newToken);
     localStorage.setItem('authToken', newToken);
     setIsAuthenticated(true);
+    
+    if (newAemToken) {
+      setAemToken(newAemToken);
+      localStorage.setItem('aemToken', newAemToken);
+    }
   };
 
   const logout = () => {
     setToken(null);
+    setAemToken(null);
     localStorage.removeItem('authToken');
+    localStorage.removeItem('aemToken');
     setIsAuthenticated(false);
   };
 
