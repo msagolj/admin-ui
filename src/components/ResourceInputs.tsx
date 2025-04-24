@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, TextField } from '@mui/material';
+import { Box, TextField, Autocomplete } from '@mui/material';
 import { useResource } from '../context/ResourceContext';
 
 interface ResourceInputsProps {
@@ -27,7 +27,11 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
     owner, setOwner, 
     repo, setRepo, 
     ref, setRef, 
-    path, setPath
+    path, setPath,
+    ownerHistory,
+    repoHistory,
+    refHistory,
+    pathHistory
   } = useResource();
 
   // Set default values when component mounts
@@ -53,54 +57,86 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
       gap: 2 
     }}>
       <Box sx={{ flex: 1 }}>
-        <TextField
-          fullWidth
-          label="Owner"
+        <Autocomplete
+          freeSolo
+          options={ownerHistory}
           value={owner}
-          onChange={(e) => setOwner(e.target.value)}
-          required
-          placeholder="Repository owner"
-          helperText="Repository owner (e.g., organization or user name)"
-          InputProps={{ readOnly: readOnlyOwner }}
+          onChange={(_, newValue) => setOwner(newValue || '')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              label="Owner"
+              required
+              onChange={(e) => setOwner(e.target.value)}
+              placeholder="Repository owner"
+              helperText="Repository owner (e.g., organization or user name)"
+              InputProps={{ ...params.InputProps, readOnly: readOnlyOwner }}
+            />
+          )}
         />
       </Box>
 
       <Box sx={{ flex: 1 }}>
-        <TextField
-          fullWidth
-          label="Repository"
+        <Autocomplete
+          freeSolo
+          options={repoHistory}
           value={repo}
-          onChange={(e) => setRepo(e.target.value)}
-          required
-          placeholder="Repository name"
-          helperText="Name of the repository"
-          InputProps={{ readOnly: readOnlyRepo }}
+          onChange={(_, newValue) => setRepo(newValue || '')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              label="Repository"
+              required
+              onChange={(e) => setRepo(e.target.value)}
+              placeholder="Repository name"
+              helperText="Name of the repository"
+              InputProps={{ ...params.InputProps, readOnly: readOnlyRepo }}
+            />
+          )}
         />
       </Box>
 
       <Box sx={{ flex: 1 }}>
-        <TextField
-          fullWidth
-          label="Reference"
+        <Autocomplete
+          freeSolo
+          options={refHistory}
           value={ref}
-          onChange={(e) => setRef(e.target.value)}
-          required
-          placeholder="Branch or ref"
-          helperText="Ref (branch) of repository"
-          InputProps={{ readOnly: readOnlyRef }}
+          onChange={(_, newValue) => setRef(newValue || '')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              label="Reference"
+              required
+              onChange={(e) => setRef(e.target.value)}
+              placeholder="Branch or ref"
+              helperText="Ref (branch) of repository"
+              InputProps={{ ...params.InputProps, readOnly: readOnlyRef }}
+            />
+          )}
         />
       </Box>
 
       <Box sx={{ flex: 1 }}>
-        <TextField
-          fullWidth
-          label="Path"
+        <Autocomplete
+          freeSolo
+          options={pathHistory}
           value={path}
-          onChange={(e) => setPath(e.target.value)}
-          required
-          placeholder="Resource path"
-          helperText="Relative path of the resource"
-          InputProps={{ readOnly: readOnlyPath }}
+          onChange={(_, newValue) => setPath(newValue || '')}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              fullWidth
+              label="Path"
+              required
+              onChange={(e) => setPath(e.target.value)}
+              placeholder="Resource path"
+              helperText="Relative path of the resource"
+              InputProps={{ ...params.InputProps, readOnly: readOnlyPath }}
+            />
+          )}
         />
       </Box>
     </Box>

@@ -16,6 +16,7 @@ interface ResourceContextType {
   refHistory: string[];
   pathHistory: string[];
   siteHistory: string[];
+  updateHistory: () => void;
 }
 
 const ResourceContext = createContext<ResourceContextType | undefined>(undefined);
@@ -27,7 +28,7 @@ const getStoredHistory = (key: string): string[] => {
   return stored ? JSON.parse(stored) : [];
 };
 
-const updateHistory = (key: string, value: string): string[] => {
+const updateStoredHistory = (key: string, value: string): string[] => {
   const history = getStoredHistory(key);
   const newHistory = [value, ...history.filter(item => item !== value)].slice(0, MAX_HISTORY);
   localStorage.setItem(`${key}_history`, JSON.stringify(newHistory));
@@ -58,38 +59,21 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('resource_site', site);
   }, [owner, repo, ref, path, site]);
 
-  const handleSetOwner = (value: string) => {
-    setOwner(value);
-    if (value) {
-      setOwnerHistory(updateHistory('resource_owner', value));
+  const updateHistory = () => {
+    if (owner) {
+      setOwnerHistory(updateStoredHistory('resource_owner', owner));
     }
-  };
-
-  const handleSetRepo = (value: string) => {
-    setRepo(value);
-    if (value) {
-      setRepoHistory(updateHistory('resource_repo', value));
+    if (repo) {
+      setRepoHistory(updateStoredHistory('resource_repo', repo));
     }
-  };
-
-  const handleSetRef = (value: string) => {
-    setRef(value);
-    if (value) {
-      setRefHistory(updateHistory('resource_ref', value));
+    if (ref) {
+      setRefHistory(updateStoredHistory('resource_ref', ref));
     }
-  };
-
-  const handleSetPath = (value: string) => {
-    setPath(value);
-    if (value) {
-      setPathHistory(updateHistory('resource_path', value));
+    if (path) {
+      setPathHistory(updateStoredHistory('resource_path', path));
     }
-  };
-
-  const handleSetSite = (value: string) => {
-    setSite(value);
-    if (value) {
-      setSiteHistory(updateHistory('resource_site', value));
+    if (site) {
+      setSiteHistory(updateStoredHistory('resource_site', site));
     }
   };
 
@@ -97,20 +81,21 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <ResourceContext.Provider
       value={{
         owner,
-        setOwner: handleSetOwner,
+        setOwner,
         repo,
-        setRepo: handleSetRepo,
+        setRepo,
         ref,
-        setRef: handleSetRef,
+        setRef,
         path,
-        setPath: handleSetPath,
+        setPath,
         site,
-        setSite: handleSetSite,
+        setSite,
         ownerHistory,
         repoHistory,
         refHistory,
         pathHistory,
         siteHistory,
+        updateHistory,
       }}
     >
       {children}

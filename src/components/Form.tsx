@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { apiCall } from '../utils/api';
+import { useResource } from '../context/ResourceContext';
 
 interface FormProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ const useFormState = () => {
   const [jobLink, setJobLink] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { error, handleError, clearError } = useErrorHandler();
+  const { updateHistory } = useResource();
 
   const executeSubmit = async (requestDetails: any) => {
     setLoading(true);
@@ -32,6 +34,11 @@ const useFormState = () => {
         setJobLink(responseData.links.self);
       } else {
         setJobLink(null);
+      }
+
+      // Update history only on successful API call
+      if (status >= 200 && status < 300) {
+        updateHistory();
       }
     } catch (err) {
       handleError(err, 'Form Submission');

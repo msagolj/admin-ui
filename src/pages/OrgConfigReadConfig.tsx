@@ -13,7 +13,7 @@ import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from 'components/ResponseDisplay';
-
+import SiteInputs from 'components/SiteInputs';
 const OrgConfigReadConfig: React.FC = () => {
   const { owner, setOwner } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
@@ -50,15 +50,9 @@ const OrgConfigReadConfig: React.FC = () => {
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
         <Form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="Organization"
-              value={owner}
-              onChange={(e) => setOwner(e.target.value)}
-              required
-              placeholder="Organization name"
-              helperText="Name of the organization"
-            />
+          <SiteInputs
+              hideSite={true}
+             />
             <ApiUrlDisplay
               method="GET"
               url={`https://admin.hlx.page/config/${owner || '{org}'}.json`}
