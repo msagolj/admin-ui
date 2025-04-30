@@ -82,7 +82,7 @@ const SiteConfigListConfig: React.FC = () => {
             size="small"
             onClick={() => setShowDefault(!showDefault)}
           >
-            {showDefault ? 'List View' : 'Default View'}
+            {showDefault ? 'UI View' : 'HTTP View'}
           </Button>
         </Box>
         {showDefault ? (

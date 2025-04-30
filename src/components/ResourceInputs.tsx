@@ -68,9 +68,9 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Owner"
               required
-              onChange={(e) => setOwner(e.target.value)}
-              placeholder="Repository owner"
-              helperText="Repository owner (e.g., organization or user name)"
+          onChange={(e) => setOwner(e.target.value)}
+          placeholder="Repository owner"
+          helperText="Repository owner (e.g., organization or user name)"
               InputProps={{ ...params.InputProps, readOnly: readOnlyOwner }}
             />
           )}
@@ -89,9 +89,9 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Repository"
               required
-              onChange={(e) => setRepo(e.target.value)}
-              placeholder="Repository name"
-              helperText="Name of the repository"
+          onChange={(e) => setRepo(e.target.value)}
+          placeholder="Repository name"
+          helperText="Name of the repository"
               InputProps={{ ...params.InputProps, readOnly: readOnlyRepo }}
             />
           )}
@@ -110,9 +110,9 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Reference"
               required
-              onChange={(e) => setRef(e.target.value)}
-              placeholder="Branch or ref"
-              helperText="Ref (branch) of repository"
+          onChange={(e) => setRef(e.target.value)}
+          placeholder="Branch or ref"
+          helperText="Ref (branch) of repository"
               InputProps={{ ...params.InputProps, readOnly: readOnlyRef }}
             />
           )}
@@ -131,9 +131,9 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Path"
               required
-              onChange={(e) => setPath(e.target.value)}
-              placeholder="Resource path"
-              helperText="Relative path of the resource"
+          onChange={(e) => setPath(e.target.value)}
+          placeholder="Resource path"
+          helperText="Relative path of the resource"
               InputProps={{ ...params.InputProps, readOnly: readOnlyPath }}
             />
           )}

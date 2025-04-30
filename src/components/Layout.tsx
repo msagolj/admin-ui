@@ -70,7 +70,8 @@ const existingRoutes = [
   '/org-config/read',
   '/org-config/users',
   '/site-config/list',
-  '/site-config/read'
+  '/site-config/read',
+  '/site-config/update'
 ];
 
 interface SubMenuItem {

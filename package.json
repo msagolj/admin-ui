@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
+    "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.15.14",
     "@mui/material": "^5.15.14",
     "@testing-library/dom": "^9.3.4",
@@ -16,6 +17,7 @@
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",
     "@types/react-router-dom": "^5.3.3",
+    "ajv": "^8.17.1",
     "axios": "^1.6.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

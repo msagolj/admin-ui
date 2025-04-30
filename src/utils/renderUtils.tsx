@@ -81,7 +81,8 @@ export const formatLabel = (key: string): string => {
     'url': 'URL',
     'api': 'API',
     'bus': 'Bus',
-    'hlx': 'HLX'
+    'hlx': 'HLX',
+    'cdn': 'CDN',
   };
 
   // Split by capital letters and special characters
