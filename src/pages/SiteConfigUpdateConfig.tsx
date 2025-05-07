@@ -97,7 +97,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
       <PageHeader
         title="Update Site Config"
         description="Updates the site configuration for a specific site. The configuration should be provided as a JSON object."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/site-config/operation/updateSiteConfig"
+        helpUrl="https://www.aem.live/docs/admin.html#tag/siteConfig/operation/updateConfigSite"
         icon={SettingsIcon}
       />
 
