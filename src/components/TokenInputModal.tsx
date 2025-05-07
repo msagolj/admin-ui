@@ -50,9 +50,11 @@ const TokenInputModal: React.FC<TokenInputModalProps> = ({ open, onClose, onSubm
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Ensure AEM token starts with 'Bearer '
-    const formattedAemToken = aemToken.trim().startsWith('Bearer ') 
-      ? aemToken.trim() 
-      : `Bearer ${aemToken.trim()}`;
+    const formattedAemToken = aemToken.trim() === '' 
+      ? '' 
+      : aemToken.trim().startsWith('Bearer ') 
+        ? aemToken.trim() 
+        : `Bearer ${aemToken.trim()}`;
     onSubmit(token, formattedAemToken);
     setToken('');
     setAemToken('');

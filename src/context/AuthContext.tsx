@@ -95,8 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = (url: string) => {
-    // Open login URL in a new window
-    window.open(url, 'login', 'width=600,height=800');
+    // Open login URL in a new tab
+    window.open(url, '_blank');
   };
 
   const handleTokenSubmit = (newToken: string, newAemToken: string) => {
