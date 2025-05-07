@@ -17,6 +17,7 @@ import ResponseDisplay from 'components/ResponseDisplay';
 import SiteInputs from 'components/SiteInputs';
 import JsonEditor from '../components/JsonEditor';
 import { apiCall } from 'utils/api';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 const SiteConfigUpdateSiteConfig: React.FC = () => {
   const { owner, site } = useResource();
@@ -24,6 +25,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
   const [validate, setValidate] = useState(false);
   const [config, setConfig] = useState<any>({});
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { error: jsonError, handleError, clearError } = useErrorHandler();
   const [requestDetails, setRequestDetails] = useState<{
     url: string;
     method: string;
@@ -49,7 +51,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
             setConfig(responseData);
           }
         } catch (error) {
-          console.error('Error fetching config:', error);
+          handleError(error, 'Error fetching config');
           setConfig({});
         }
       }
@@ -59,12 +61,22 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError();
     const queryParams: Record<string, string> = {};
     if (migrate) {
       queryParams.migrate = 'true';
       if (validate) {
         queryParams.validate = 'true';
       }
+    }
+
+    // Parse the config to ensure it's valid JSON
+    let parsedConfig;
+    try {
+      parsedConfig = typeof config === 'string' ? JSON.parse(config) : config;
+    } catch (error) {
+      handleError(error, 'Invalid JSON configuration');
+      return;
     }
 
     const details = {
@@ -74,7 +86,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
         'Content-Type': 'application/json'
       },
       queryParams,
-      body: config
+      body: parsedConfig
     };
     setRequestDetails(details);
     executeSubmit(details);
@@ -138,9 +150,10 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
       </Paper>
 
       <ErrorDisplay 
-        error={error} 
+        error={error || jsonError} 
         onDismiss={() => {
           reset();
+          clearError();
           setRequestDetails(null);
         }}
         requestDetails={requestDetails}

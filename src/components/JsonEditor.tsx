@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Box, Typography } from '@mui/material';
 
@@ -18,17 +18,24 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
   required,
   helperText 
 }) => {
-  const handleEditorChange = (value: string | undefined) => {
-    if (!value) {
-      onChange({});
+  const [internalValue, setInternalValue] = useState<string>('');
+
+  useEffect(() => {
+    setInternalValue(typeof value === 'string' ? value : JSON.stringify(value, null, 2));
+  }, [value]);
+
+  const handleEditorChange = (newValue: string | undefined) => {
+    if (!newValue) {
+      setInternalValue('');
       return;
     }
+    setInternalValue(newValue);
     try {
-      const newValue = JSON.parse(value);
-      onChange(newValue);
+      const parsedValue = JSON.parse(newValue);
+      onChange(parsedValue);
     } catch (err) {
       // If JSON is invalid, just pass the raw string
-      onChange(value);
+      onChange(newValue);
     }
   };
 
@@ -49,7 +56,7 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
         <Editor
           height="400px"
           defaultLanguage="json"
-          value={typeof value === 'string' ? value : JSON.stringify(value, null, 2)}
+          value={internalValue}
           onChange={handleEditorChange}
           options={{
             minimap: { enabled: false },
