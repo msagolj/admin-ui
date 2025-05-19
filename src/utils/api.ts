@@ -17,8 +17,8 @@ export async function apiCall(
   // Extract just the path part from the URL
   const urlPath = requestDetails.url.replace('https://admin.hlx.page', '');
   
-  // Use proxy URL in development
-  const baseUrl = process.env.NODE_ENV === 'development' ? '/api' : '';
+  // Always use proxy URL
+  const baseUrl = '/api';
   // Ensure we have a single leading slash
   const cleanPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
   const fullUrl = `${baseUrl}${cleanPath}`;
