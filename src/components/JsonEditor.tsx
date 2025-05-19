@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { Box, Typography } from '@mui/material';
 
@@ -19,24 +19,24 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
   helperText 
 }) => {
   const [internalValue, setInternalValue] = useState<string>('');
+  const editorRef = useRef<any>(null);
 
   useEffect(() => {
     setInternalValue(typeof value === 'string' ? value : JSON.stringify(value, null, 2));
   }, [value]);
 
-  const handleEditorChange = (newValue: string | undefined) => {
-    if (!newValue) {
-      setInternalValue('');
-      return;
-    }
-    setInternalValue(newValue);
-    try {
-      const parsedValue = JSON.parse(newValue);
-      onChange(parsedValue);
-    } catch (err) {
-      // If JSON is invalid, just pass the raw string
-      onChange(newValue);
-    }
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+    editor.onDidBlurEditorWidget(() => {
+      const currentValue = editor.getValue();
+      try {
+        const parsedValue = JSON.parse(currentValue);
+        onChange(parsedValue);
+      } catch (err) {
+        // If JSON is invalid, just pass the raw string
+        onChange(currentValue);
+      }
+    });
   };
 
   return (
@@ -57,7 +57,7 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
           height="400px"
           defaultLanguage="json"
           value={internalValue}
-          onChange={handleEditorChange}
+          onMount={handleEditorDidMount}
           options={{
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
@@ -66,7 +66,7 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
             folding: true,
             formatOnPaste: true,
             formatOnType: true,
-            automaticLayout: true,
+            automaticLayout: true
           }}
           theme="vs-light"
         />
