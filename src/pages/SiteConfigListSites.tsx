@@ -15,6 +15,9 @@ import {
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -22,6 +25,8 @@ import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from 'components/ResponseDisplay';
 import SiteInputs from 'components/SiteInputs';
+import { apiCall } from 'utils/api';
+import { useErrorHandler } from '../hooks/useErrorHandler';
 
 interface Site {
   name: string;
@@ -35,6 +40,7 @@ const SiteConfigListConfig: React.FC = () => {
   const navigate = useNavigate();
   const { owner, setOwner, setSite } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { error: jsonError, handleError, clearError } = useErrorHandler();
   const [showDefault, setShowDefault] = useState(false);
   const [requestDetails, setRequestDetails] = useState<{
     url: string;
@@ -60,6 +66,39 @@ const SiteConfigListConfig: React.FC = () => {
   const handleViewConfig = (siteName: string) => {
     setSite(siteName);
     navigate('/site-config/read');
+  };
+
+  const handleEditConfig = (siteName: string) => {
+    setSite(siteName);
+    navigate('/site-config/update');
+  };
+
+  const handleCopyConfig = async (siteName: string) => {
+    try {
+      const details = {
+        url: `https://admin.hlx.page/config/${owner}/sites/${siteName}.json`,
+        method: 'GET',
+        headers: {},
+        queryParams: {},
+        body: null
+      };
+      
+      const { responseData } = await apiCall(details);
+      
+      // Store the config in sessionStorage
+      sessionStorage.setItem('copiedSiteConfig', JSON.stringify(responseData));
+      
+      // Navigate to create page with empty site
+      setSite('');
+      navigate('/site-config/create');
+    } catch (error) {
+      handleError(error, 'Error copying site configuration');
+    }
+  };
+
+  const handleDeleteConfig = (siteName: string) => {
+    setSite(siteName);
+    navigate('/site-config/delete');
   };
 
   const renderSitesList = () => {
@@ -96,14 +135,42 @@ const SiteConfigListConfig: React.FC = () => {
             {data.sites.map((site, index) => (
               <React.Fragment key={site.name}>
                 <ListItem>
+                <IconButton
+                    edge="start"
+                    aria-label="delete config"
+                    onClick={() => handleDeleteConfig(site.name)}
+                    title="Delete Site Config"
+                    sx={{ mr: 2 }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+{/*                  <IconButton
+                    edge="start"
+                    aria-label="copy config"
+                    onClick={() => handleCopyConfig(site.name)}
+                    title="Copy Site Config for new Site"
+                    sx={{ mr: 1 }}
+                  >
+                    <ContentCopyIcon />
+                  </IconButton>
+                  */}
                   <IconButton
                     edge="start"
                     aria-label="view config"
                     onClick={() => handleViewConfig(site.name)}
                     title="View Site Config"
-                    sx={{ mr: 2 }}
+                    sx={{ mr: 1 }}
                   >
                     <VisibilityIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="start"
+                    aria-label="edit config"
+                    onClick={() => handleEditConfig(site.name)}
+                    title="Edit Site Config"
+                    sx={{ mr: 1 }}
+                  >
+                    <EditIcon />
                   </IconButton>
                   <ListItemText 
                     primary={site.name}

@@ -91,6 +91,13 @@ export function isNotFoundError(error: unknown): boolean {
   return false;
 }
 
+export function isBadRequestError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.status === 400;
+  }
+  return false;
+}
+
 export function isServerError(error: unknown): boolean {
   if (error instanceof ApiError) {
     return error.status >= 500;

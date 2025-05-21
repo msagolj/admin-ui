@@ -71,7 +71,8 @@ const existingRoutes = [
   '/org-config/users',
   '/site-config/list',
   '/site-config/read',
-  '/site-config/update'
+  '/site-config/update',
+  '/site-config/delete'
 ];
 
 interface SubMenuItem {

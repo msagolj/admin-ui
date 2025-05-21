@@ -15,6 +15,8 @@ import OrgConfigListUsers from './pages/OrgConfigListUsers';
 import SiteConfigListConfig from './pages/SiteConfigListSites';
 import SiteConfigReadConfig from './pages/SiteConfigReadConfig';
 import SiteConfigUpdateSiteConfig from './pages/SiteConfigUpdateConfig';
+import SiteConfigCreateConfig from './pages/SiteConfigCreateConfig';
+import SiteConfigDeleteConfig from './pages/SiteConfigDeleteConfig';
 import PreviewStatus from './pages/PreviewStatus';
 import PreviewUpdate from './pages/PreviewUpdate';
 import PreviewDelete from './pages/PreviewDelete';
@@ -59,7 +61,9 @@ const App: React.FC = () => {
                 <Route path="/org-config/users" element={<OrgConfigListUsers />} />
                 <Route path="/site-config/list" element={<SiteConfigListConfig />} />
                 <Route path="/site-config/read" element={<SiteConfigReadConfig />} />
+                <Route path="/site-config/create" element={<SiteConfigCreateConfig />} />
                 <Route path="/site-config/update" element={<SiteConfigUpdateSiteConfig />} />
+                <Route path="/site-config/delete" element={<SiteConfigDeleteConfig />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
                 <Route path="/preview/update" element={<PreviewUpdate />} />
                 <Route path="/preview/delete" element={<PreviewDelete />} />
