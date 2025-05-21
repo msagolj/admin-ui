@@ -29,6 +29,10 @@ import CodeStatus from './pages/CodeStatus';
 import CodeUpdate from './pages/CodeUpdate';
 import CodeDelete from './pages/CodeDelete';
 import CachePurgeLive from './pages/CachePurgeLive';
+import JobList from './pages/JobList';
+import JobStatus from './pages/JobStatus';
+import JobStatusDetails from './pages/JobStatusDetails';
+import JobStop from './pages/JobStop';
 
 const theme = createTheme({
   palette: {
@@ -76,6 +80,10 @@ const App: React.FC = () => {
                 <Route path="/code/update" element={<CodeUpdate />} />
                 <Route path="/code/delete" element={<CodeDelete />} />
                 <Route path="/cache/purge" element={<CachePurgeLive />} />
+                <Route path="/jobs/list" element={<JobList />} />
+                <Route path="/jobs/status" element={<JobStatus />} />
+                <Route path="/jobs/details" element={<JobStatusDetails />} />
+                <Route path="/jobs/stop" element={<JobStop />} />
               </Routes>
             </Layout>
           </Router>

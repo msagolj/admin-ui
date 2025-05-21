@@ -72,7 +72,11 @@ const existingRoutes = [
   '/site-config/list',
   '/site-config/read',
   '/site-config/update',
-  '/site-config/delete'
+  '/site-config/delete',
+  '/jobs/list',
+  '/jobs/status',
+  '/jobs/details',
+  '/jobs/stop'
 ];
 
 interface SubMenuItem {

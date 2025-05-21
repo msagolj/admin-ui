@@ -9,13 +9,19 @@ interface ResourceContextType {
   setRef: (value: string) => void;
   path: string;
   setPath: (value: string) => void;
+  topic: string;
+  setTopic: (value: string) => void;
   site: string;
   setSite: (value: string) => void;
+  jobName: string;
+  setJobName: (value: string) => void;
   ownerHistory: string[];
   repoHistory: string[];
   refHistory: string[];
   pathHistory: string[];
+  topicHistory: string[];
   siteHistory: string[];
+  jobNameHistory: string[];
   updateHistory: () => void;
 }
 
@@ -41,14 +47,18 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [repo, setRepo] = useState(() => localStorage.getItem('resource_repo') || '');
   const [ref, setRef] = useState(() => localStorage.getItem('resource_ref') || '');
   const [path, setPath] = useState(() => localStorage.getItem('resource_path') || '');
+  const [topic, setTopic] = useState(() => localStorage.getItem('resource_topic') || '');
   const [site, setSite] = useState(() => localStorage.getItem('resource_site') || '');
+  const [jobName, setJobName] = useState(() => localStorage.getItem('resource_jobName') || '');
 
   // Initialize history from localStorage
   const [ownerHistory, setOwnerHistory] = useState(() => getStoredHistory('resource_owner'));
   const [repoHistory, setRepoHistory] = useState(() => getStoredHistory('resource_repo'));
   const [refHistory, setRefHistory] = useState(() => getStoredHistory('resource_ref'));
   const [pathHistory, setPathHistory] = useState(() => getStoredHistory('resource_path'));
+  const [topicHistory, setTopicHistory] = useState(() => getStoredHistory('resource_topic'));
   const [siteHistory, setSiteHistory] = useState(() => getStoredHistory('resource_site'));
+  const [jobNameHistory, setJobNameHistory] = useState(() => getStoredHistory('resource_jobName'));
 
   // Save to localStorage when values change
   useEffect(() => {
@@ -56,8 +66,10 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('resource_repo', repo);
     localStorage.setItem('resource_ref', ref);
     localStorage.setItem('resource_path', path);
+    localStorage.setItem('resource_topic', topic);
     localStorage.setItem('resource_site', site);
-  }, [owner, repo, ref, path, site]);
+    localStorage.setItem('resource_jobName', jobName);
+  }, [owner, repo, ref, path, topic, site, jobName]);
 
   const updateHistory = () => {
     if (owner) {
@@ -72,8 +84,14 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (path) {
       setPathHistory(updateStoredHistory('resource_path', path));
     }
+    if (topic) {
+      setTopicHistory(updateStoredHistory('resource_topic', topic));
+    }
     if (site) {
       setSiteHistory(updateStoredHistory('resource_site', site));
+    }
+    if (jobName) {
+      setJobNameHistory(updateStoredHistory('resource_jobName', jobName));
     }
   };
 
@@ -88,13 +106,19 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setRef,
         path,
         setPath,
+        topic,
+        setTopic,
         site,
         setSite,
+        jobName,
+        setJobName,
         ownerHistory,
         repoHistory,
         refHistory,
         pathHistory,
+        topicHistory,
         siteHistory,
+        jobNameHistory,
         updateHistory,
       }}
     >
