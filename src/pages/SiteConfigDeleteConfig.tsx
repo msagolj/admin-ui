@@ -11,6 +11,7 @@ import {
   DialogActions
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import WebIcon from '@mui/icons-material/Web';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -62,7 +63,7 @@ const SiteConfigDeleteConfig: React.FC = () => {
         title="Delete Site Config"
         description="Deletes the site configuration for a specific site."
         helpUrl="https://www.aem.live/docs/admin.html#tag/siteConfig/operation/deleteConfigSite"
-        icon={DeleteIcon}
+        icon={WebIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
@@ -78,7 +79,7 @@ const SiteConfigDeleteConfig: React.FC = () => {
               color="error"
               type="submit"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : <DeleteIcon />}
+              startIcon={loading ? <CircularProgress size={20} /> : null}
             >
               Delete Site Config
             </Button>

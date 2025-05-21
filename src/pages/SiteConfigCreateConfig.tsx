@@ -14,7 +14,7 @@ import ResponseDisplay from 'components/ResponseDisplay';
 import SiteInputs from 'components/SiteInputs';
 import JsonEditor from '../components/JsonEditor';
 import { useErrorHandler } from '../hooks/useErrorHandler';
-import SettingsIcon from '@mui/icons-material/Settings';
+import WebIcon from '@mui/icons-material/Web';
 
 const SiteConfigCreateConfig: React.FC = () => {
   const { owner, site } = useResource();
@@ -80,9 +80,9 @@ const SiteConfigCreateConfig: React.FC = () => {
     <Box>
       <PageHeader
         title="Create Site Config"
-        description="Creates a new site configuration for a specific site. The configuration should be provided as a JSON object."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/siteConfig/operation/createSiteSite"
-        icon={SettingsIcon}
+        description="Creates a new site level configuration."
+        icon={WebIcon}
+        helpUrl="https://www.aem.live/docs/admin.html#putCreate-Site-Config"
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>

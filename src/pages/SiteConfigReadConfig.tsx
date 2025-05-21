@@ -7,7 +7,7 @@ import {
   FormControlLabel,
   Switch
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+import WebIcon from '@mui/icons-material/Web';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -56,7 +56,7 @@ const SiteConfigReadConfig: React.FC = () => {
         title="Read Site Config"
         description="Returns the site level configuration. If migrate is set to true, the configuration will be aggregated based on the legacy config (fstab, .helix/config.xlsx, etc)."
         helpUrl="https://www.aem.live/docs/admin.html#tag/siteConfig/operation/getConfigSite"
-        icon={SettingsIcon}
+        icon={WebIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>

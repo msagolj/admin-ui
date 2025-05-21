@@ -13,7 +13,7 @@ import {
   Divider,
   IconButton
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+import WebIcon from '@mui/icons-material/Web';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
@@ -198,9 +198,9 @@ const SiteConfigListConfig: React.FC = () => {
     <Box>
       <PageHeader
         title="List Sites"
-        description="Returns the site level configuration names."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/siteConfig/operation/getConfigSites"
-        icon={SettingsIcon}
+        description="Returns a list of all sites in the organization."
+        icon={WebIcon}
+        helpUrl="https://www.aem.live/docs/admin.html#getList-Site-Config"
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>

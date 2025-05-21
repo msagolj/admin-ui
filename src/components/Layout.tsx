@@ -38,7 +38,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import DescriptionIcon from '@mui/icons-material/Description';
 import WorkIcon from '@mui/icons-material/Work';
 import BusinessIcon from '@mui/icons-material/Business';
-import SettingsIcon from '@mui/icons-material/Settings';
+import WebIcon from '@mui/icons-material/Web';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import SendIcon from '@mui/icons-material/Send';
@@ -241,7 +241,7 @@ const menuGroups: MenuGroup[] = [
       },
       {
         text: 'Site Config',
-        icon: <SettingsIcon />,
+        icon: <WebIcon />,
         subItems: [
           { text: 'List Sites', path: '/site-config/list', method: 'GET' },
           { text: 'Read Site Config', path: '/site-config/read', method: 'GET' },
@@ -555,7 +555,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Typography>
           <Button
             color="inherit"
-            startIcon={<SettingsIcon />}
+            startIcon={<WebIcon />}
             onClick={handleSettingsClick}
             sx={{ ml: 2 }}
           >

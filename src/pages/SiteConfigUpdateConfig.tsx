@@ -7,7 +7,7 @@ import {
   FormControlLabel,
   Switch
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+import WebIcon from '@mui/icons-material/Web';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
@@ -96,9 +96,9 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
     <Box>
       <PageHeader
         title="Update Site Config"
-        description="Updates the site configuration for a specific site. The configuration should be provided as a JSON object."
-        helpUrl="https://www.aem.live/docs/admin.html#tag/siteConfig/operation/updateConfigSite"
-        icon={SettingsIcon}
+        description="Updates the site level configuration."
+        icon={WebIcon}
+        helpUrl="https://www.aem.live/docs/admin.html#postUpdate-Site-Config"
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>

@@ -6,7 +6,7 @@ import {
   CircularProgress,
   TextField
 } from '@mui/material';
-import StopIcon from '@mui/icons-material/Stop';
+import WorkIcon from '@mui/icons-material/Work';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import JobResourceInputs from '../components/JobResourceInputs';
@@ -45,7 +45,7 @@ const JobStop: React.FC = () => {
         title="Stop Job"
         description="Stops a running job. Returns 204 if successful, 409 if the job cannot be stopped in its current state."
         helpUrl="https://www.aem.live/docs/admin.html#tag/job/operation/stopJob"
-        icon={StopIcon}
+        icon={WorkIcon}
       />
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
@@ -72,7 +72,7 @@ const JobStop: React.FC = () => {
               color="error"
               type="submit"
               disabled={loading || !jobName}
-              startIcon={loading ? <CircularProgress size={20} /> : <StopIcon />}
+              startIcon={loading ? <CircularProgress size={20} /> : null}
             >
               Stop Job
             </Button>
