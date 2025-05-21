@@ -27,7 +27,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import SettingsIcon from '@mui/icons-material/Settings';
 import PreviewIcon from '@mui/icons-material/Preview';
 import CodeIcon from '@mui/icons-material/Code';
 import CachedIcon from '@mui/icons-material/Cached';
@@ -555,7 +555,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Typography>
           <Button
             color="inherit"
-            startIcon={<WebIcon />}
+            startIcon={<SettingsIcon />}
             onClick={handleSettingsClick}
             sx={{ ml: 2 }}
           >
