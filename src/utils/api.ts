@@ -14,18 +14,17 @@ export async function apiCall(
     ...requestDetails.headers,
   };
   
-  /*
   // Extract just the path part from the URL
   const urlPath = requestDetails.url.replace('https://admin.hlx.page', '');
   
   // Always use proxy URL
-  const baseUrl = '/admin-ui/api';
+  const baseUrl = '/api';
   // Ensure we have a single leading slash
   const cleanPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
   const fullUrl = `${baseUrl}${cleanPath}`;
-*/
+
   try {
-    const response = await fetch(requestDetails.url, {
+    const response = await fetch(fullUrl, {
       method: requestDetails.method,
       headers: requestDetails.headers,
       credentials: 'include',
