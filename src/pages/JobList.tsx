@@ -8,7 +8,7 @@ import {
 import WorkIcon from '@mui/icons-material/Work';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import ResponseDisplay from '../components/overlays/ResponseDisplay';
+import JobListDisplay from '../components/overlays/JobListDisplay';
 import JobResourceInputs from '../components/JobResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
@@ -77,9 +77,9 @@ const JobList: React.FC = () => {
       />
 
       {status && (
-        <ResponseDisplay
-          requestDetails={requestDetails}
+        <JobListDisplay
           responseData={responseData}
+          requestDetails={requestDetails}
           responseStatus={status}
         />
       )}

@@ -17,7 +17,7 @@ const RequestDisplay: React.FC<{
   requestDetails: any;
 }> = (props) => {
   const { headers, method, url, body, queryParams } = props.requestDetails;
-  const [showRequestDetails, setShowRequestDetails] = useState(true);
+  const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [copyCurlSuccess, setCopyCurlSuccess] = useState(false);
 
   const copyCurl = async () => {

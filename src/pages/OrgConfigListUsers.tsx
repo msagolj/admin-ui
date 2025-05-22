@@ -5,12 +5,6 @@ import {
   Button,
   CircularProgress,
   TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography
 } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -19,7 +13,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import ResponseDisplay from '../components/overlays/ResponseDisplay';
+import OrgListUsersDisplay from '../components/overlays/OrgListUsersDisplay';
 import SiteInputs from 'components/SiteInputs';
 
 interface User {
@@ -32,7 +26,6 @@ interface User {
 const OrgConfigListUsers: React.FC = () => {
   const { owner, setOwner } = useResource();
   const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [showDefault, setShowDefault] = useState(false);
   const [requestDetails, setRequestDetails] = useState<{
     url: string;
     method: string;
@@ -52,60 +45,6 @@ const OrgConfigListUsers: React.FC = () => {
     };
     setRequestDetails(details);
     executeSubmit(details);
-  };
-
-  const renderUsersTable = (users: User[]) => {
-    if (!users || users.length === 0) {
-      return (
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-          No users found for this organization.
-        </Typography>
-      );
-    }
-
-    return (
-      <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={() => setShowDefault(!showDefault)}
-          >
-            {showDefault ? 'List View' : 'Default View'}
-          </Button>
-        </Box>
-        {showDefault ? (
-          <ResponseDisplay
-            requestDetails={requestDetails}
-            responseData={responseData}
-            responseStatus={status || 0}
-          />
-        ) : (
-          <TableContainer component={Paper} sx={{ mt: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Roles</TableCell>
-                  <TableCell>ID</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.roles.join(', ')}</TableCell>
-                    <TableCell>{user.id}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Box>
-    );
   };
 
   return (
@@ -148,17 +87,14 @@ const OrgConfigListUsers: React.FC = () => {
         requestDetails={requestDetails}
       />
 
-      {status === 200 && responseData && Array.isArray(responseData) && (
-        renderUsersTable(responseData)
-      )}
-
-      {status && status !== 200 && (
-        <ResponseDisplay
+      {status && 
+        <OrgListUsersDisplay 
+          users={responseData} 
           requestDetails={requestDetails}
-          responseData={responseData}
           responseStatus={status}
         />
-      )}
+      }
+
     </Box>
   );
 };
