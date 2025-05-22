@@ -340,6 +340,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             },
             boxShadow: 'none',
             backgroundColor: 'transparent',
+            '&.Mui-expanded': {
+              margin: '0',
+            },
           }}
         >
           <AccordionSummary
@@ -350,14 +353,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 margin: '0',
                 padding: '0',
               },
+              '&.Mui-expanded': {
+                minHeight: '48px',
+              },
             }}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 'bold', pl: 2 }}>
               {group.title}
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ p: 0 }}>
-            <List>
+          <AccordionDetails sx={{ p: 0, pt: 0.1 }}>
+            <List sx={{ py: 0 }}>
               {group.items.map((item) => (
                 <React.Fragment key={item.text}>
                   {item.subItems ? (
