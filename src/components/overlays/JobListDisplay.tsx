@@ -130,7 +130,7 @@ const JobListDisplay: React.FC<JobListDisplayProps> = ({
               {jobs.map((job) => (
                 <TableRow key={job.name}>
                   <TableCell>
-                    <Tooltip title="View Job Status">
+                    <Tooltip title={job.state.toLowerCase() === 'running' ? 'View Job Status' : 'View Job Results'}>
                       <IconButton 
                         size="small" 
                         onClick={() => handleStatusClick(job.name, job.state)}
