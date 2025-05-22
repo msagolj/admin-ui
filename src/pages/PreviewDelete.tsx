@@ -9,7 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import ResponseDisplay from '../components/ResponseDisplay';
+import ResponseDisplay from '../components/overlays/ResponseDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';

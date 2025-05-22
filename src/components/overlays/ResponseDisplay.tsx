@@ -9,9 +9,8 @@ import {
   Link
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import RequestDisplay from './RequestDisplay';
-import StatusCard from './StatusCard';
-import { formatLabel, renderValue } from '../utils/renderUtils';
+import RequestDisplay from '../RequestDisplay';
+import StatusCard from '../StatusCard';
 
 const ResponseDisplay: React.FC<{
   requestDetails: any;

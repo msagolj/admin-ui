@@ -13,7 +13,7 @@ import JobResourceInputs from '../components/JobResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import ResponseDisplay from 'components/ResponseDisplay';
+import ResponseDisplay from '../components/overlays/ResponseDisplay';
 
 const JobStatus: React.FC = () => {
   const { owner, repo, ref, topic, jobName, setJobName } = useResource();

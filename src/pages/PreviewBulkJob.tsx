@@ -15,7 +15,7 @@ import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import PathSelector from '../components/PathSelector';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
+import StatusResponseDisplay from '../components/overlays/StatusResponseDisplay';
 import JobPolling from '../components/JobPolling';
 import Form, { useFormState } from '../components/Form';
 

@@ -19,7 +19,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import ResponseDisplay from 'components/ResponseDisplay';
+import ResponseDisplay from '../components/overlays/ResponseDisplay';
 import SiteInputs from 'components/SiteInputs';
 
 interface User {

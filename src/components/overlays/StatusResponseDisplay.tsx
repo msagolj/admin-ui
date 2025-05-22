@@ -8,8 +8,8 @@ import {
   Divider
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import RequestDisplay from './RequestDisplay';
-import StatusCard from './StatusCard';
+import RequestDisplay from '../RequestDisplay';
+import StatusCard from '../StatusCard';
 
 const StatusResponseDisplay: React.FC<{
   requestDetails: any;

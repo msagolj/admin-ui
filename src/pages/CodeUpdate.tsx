@@ -13,7 +13,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
+import StatusResponseDisplay from '../components/overlays/StatusResponseDisplay';
 import Form, { useFormState } from '../components/Form';
 import JobPolling from 'components/JobPolling';
 

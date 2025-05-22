@@ -14,7 +14,7 @@ import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import ResponseDisplay from 'components/ResponseDisplay';
+import ResponseDisplay from '../components/overlays/ResponseDisplay';
 
 const PublishUnpublish: React.FC = () => {
   const { owner, repo, ref, path } = useResource();

@@ -8,7 +8,7 @@ import {
 import PreviewIcon from '@mui/icons-material/Preview';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import StatusResponseDisplay from '../components/StatusResponseDisplay';
+import StatusResponseDisplay from '../components/overlays/StatusResponseDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
