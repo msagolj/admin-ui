@@ -9,7 +9,7 @@ import {
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { apiCall } from '../utils/api';
 import { useErrorHandler } from '../hooks/useErrorHandler';
-import ResponseDisplay from './overlays/ResponseDisplay';
+import ResponseDisplay from './response/ResponseDisplay';
 
 interface JobPollingProps {
   jobLink: string | null;

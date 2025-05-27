@@ -11,7 +11,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
-import StatusResponseDisplay from '../components/overlays/StatusResponseDisplay';
+import StatusResponseDisplay from '../components/response/StatusResponseDisplay';
 import Form, { useFormState } from '../components/Form';
 
 const CodeStatus: React.FC = () => {

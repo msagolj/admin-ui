@@ -8,7 +8,7 @@ import {
 import WorkIcon from '@mui/icons-material/Work';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import JobListDisplay from '../components/overlays/JobListDisplay';
+import JobListDisplay from '../components/response/JobListDisplay';
 import JobResourceInputs from '../components/JobResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';

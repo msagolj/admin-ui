@@ -13,7 +13,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import OrgListUsersDisplay from '../components/overlays/OrgListUsersDisplay';
+import OrgListUsersDisplay from '../components/response/OrgListUsersDisplay';
 import SiteInputs from 'components/SiteInputs';
 
 interface User {

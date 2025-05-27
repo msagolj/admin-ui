@@ -9,12 +9,12 @@ import {
 import WorkIcon from '@mui/icons-material/Work';
 import { useResource } from '../context/ResourceContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
-import StatusResponseDisplay from '../components/overlays/StatusResponseDisplay';
+import StatusResponseDisplay from '../components/response/StatusResponseDisplay';
 import JobResourceInputs from '../components/JobResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import ResponseDisplay from '../components/overlays/ResponseDisplay';
+import ResponseDisplay from '../components/response/ResponseDisplay';
 
 const JobStatusDetails: React.FC = () => {
   const { owner, repo, ref, topic, jobName, setJobName } = useResource();
