@@ -14,15 +14,10 @@ import {
   ListItemText,
   useTheme,
   useMediaQuery,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Tooltip,
   Chip,
   Button,
-  Menu,
   MenuItem,
-  CircularProgress
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -33,16 +28,11 @@ import CodeIcon from '@mui/icons-material/Code';
 import CachedIcon from '@mui/icons-material/Cached';
 import SearchIcon from '@mui/icons-material/Search';
 import MapIcon from '@mui/icons-material/Map';
-import CameraAltIcon from '@mui/icons-material/CameraAlt';
-import LoginIcon from '@mui/icons-material/Login';
 import DescriptionIcon from '@mui/icons-material/Description';
 import WorkIcon from '@mui/icons-material/Work';
 import BusinessIcon from '@mui/icons-material/Business';
 import WebIcon from '@mui/icons-material/Web';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import SendIcon from '@mui/icons-material/Send';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import TokenInputModal from './TokenInputModal';
@@ -95,7 +85,6 @@ interface MenuItem {
 }
 
 interface MenuGroup {
-  title: string;
   items: MenuItem[];
 }
 
@@ -105,7 +94,6 @@ interface LayoutProps {
 
 const menuGroups: MenuGroup[] = [
   {
-    title: 'Authoring and Publishing',
     items: [
       {
         text: 'Status',
@@ -142,7 +130,6 @@ const menuGroups: MenuGroup[] = [
           { text: 'Code Status', path: '/code/status', method: 'GET' },
           { text: 'Update Code', path: '/code/update', method: 'POST' },
           { text: 'Delete Code', path: '/code/delete', method: 'DELETE' },
-          { text: 'Batch Update Code', path: '/code/batch', method: 'POST' }
         ]
       },
       {
@@ -169,37 +156,6 @@ const menuGroups: MenuGroup[] = [
         ]
       },
       {
-        text: 'Snapshot',
-        icon: <CameraAltIcon />,
-        subItems: [
-          { text: 'List Snapshots', path: '/snapshot/list', method: 'GET' },
-          { text: 'Snapshot Manifest', path: '/snapshot/manifest', method: 'GET' },
-          { text: 'Update Manifest', path: '/snapshot/manifest/update', method: 'POST' },
-          { text: 'Snapshot Status', path: '/snapshot/status', method: 'GET' },
-          { text: 'Add Resource', path: '/snapshot/add', method: 'POST' },
-          { text: 'Delete Snapshot', path: '/snapshot/delete', method: 'DELETE' },
-          { text: 'Bulk Snapshot Job', path: '/snapshot/bulk', method: 'POST' },
-          { text: 'Publish Resource', path: '/snapshot/publish/resource', method: 'POST' },
-          { text: 'Publish Snapshot', path: '/snapshot/publish', method: 'POST' },
-          { text: 'Change Review State', path: '/snapshot/review', method: 'POST' }
-        ]
-      },
-    ]
-  },
-  {
-    title: 'Operations',
-    items: [
-      {
-        text: 'Authentication',
-        icon: <LoginIcon />,
-        subItems: [
-          { text: 'Login Selection', path: '/auth/login', method: 'GET' },
-          { text: 'Auto Login', path: '/auth/auto', method: 'GET' },
-          { text: 'Logout', path: '/auth/logout', method: 'GET' },
-          { text: 'Profile Information', path: '/auth/profile', method: 'GET' }
-        ]
-      },
-      {
         text: 'Logs',
         icon: <DescriptionIcon />,
         subItems: [
@@ -217,11 +173,6 @@ const menuGroups: MenuGroup[] = [
           { text: 'Job Details', path: '/jobs/details', method: 'GET' }
         ]
       },
-    ]
-  },
-  {
-    title: 'Configuration Management',
-    items: [
       {
         text: 'Org Config',
         icon: <BusinessIcon />,
@@ -264,7 +215,6 @@ const menuGroups: MenuGroup[] = [
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['Authoring and Publishing']);
   const [expandedSubMenus, setExpandedSubMenus] = useState<string[]>([]);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const theme = useTheme();
@@ -275,14 +225,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
-  };
-
-  const handleAccordionChange = (groupTitle: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpandedGroups(prev => 
-      isExpanded 
-        ? [...prev, groupTitle]
-        : prev.filter(title => title !== groupTitle)
-    );
   };
 
   const handleSubMenuToggle = (menuTitle: string) => {
@@ -330,191 +272,154 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </IconButton>
       </Toolbar>
       <Divider />
-      {menuGroups.map((group) => (
-        <Accordion
-          key={group.title}
-          expanded={expandedGroups.includes(group.title)}
-          onChange={handleAccordionChange(group.title)}
-          sx={{
-            '&:before': {
-              display: 'none',
-            },
-            boxShadow: 'none',
-            backgroundColor: 'transparent',
-            '&.Mui-expanded': {
-              margin: '0',
-            },
-          }}
-        >
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            sx={{
-              minHeight: '48px',
-              '& .MuiAccordionSummary-content': {
-                margin: '0',
-                padding: '0',
-              },
-              '&.Mui-expanded': {
-                minHeight: '48px',
-              },
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', pl: 2 }}>
-              {group.title}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: 0, pt: 0.1 }}>
-            <List sx={{ py: 0 }}>
-              {group.items.map((item) => (
-                <React.Fragment key={item.text}>
-                  {item.subItems ? (
-                    <>
-                      <ListItem disablePadding>
+      <List sx={{ py: 0 }}>
+        {menuGroups[0].items.map((item) => (
+          <React.Fragment key={item.text}>
+            {item.subItems ? (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => handleSubMenuToggle(item.text)}
+                    sx={{
+                      px: 0,
+                      '& .MuiListItemIcon-root': {
+                        minWidth: '40px',
+                        ml: 4,
+                      },
+                      '& .MuiListItemText-root': {
+                        mr: 0,
+                        pr: 0.5,
+                      },
+                      '& .MuiSvgIcon-root': {
+                        mr: 2,
+                      },
+                    }}
+                  >
+                    <ListItemIcon>{item.icon}</ListItemIcon>
+                    <ListItemText primary={item.text} />
+                    <ExpandMoreIcon
+                      sx={{
+                        transform: expandedSubMenus.includes(item.text) ? 'rotate(180deg)' : 'none',
+                        transition: 'transform 0.2s',
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                {expandedSubMenus.includes(item.text) && (
+                  <List sx={{ pl: 4 }}>
+                    {item.subItems.map((subItem) => (
+                      <ListItem key={subItem.text} disablePadding>
                         <ListItemButton
-                          onClick={() => handleSubMenuToggle(item.text)}
+                          onClick={() => {
+                            if (subItem.path && isRouteExists(subItem.path)) {
+                              navigate(subItem.path);
+                            }
+                            if (isMobile) {
+                              setMobileOpen(false);
+                            }
+                          }}
+                          disabled={!isRouteExists(subItem.path)}
                           sx={{
                             px: 0,
-                            '& .MuiListItemIcon-root': {
-                              minWidth: '40px',
-                              ml: 4,
+                            pl: 2,
+                            backgroundColor: isActivePath(subItem.path) ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
+                            '&:hover': {
+                              backgroundColor: isActivePath(subItem.path) 
+                                ? 'rgba(25, 118, 210, 0.12)' 
+                                : 'rgba(0, 0, 0, 0.04)',
                             },
-                            '& .MuiListItemText-root': {
-                              mr: 0,
-                              pr: 0.5,
-                            },
-                            '& .MuiSvgIcon-root': {
-                              mr: 2,
+                            '&.Mui-disabled': {
+                              opacity: 0.5,
                             },
                           }}
                         >
-                          <ListItemIcon>{item.icon}</ListItemIcon>
-                          <ListItemText primary={item.text} />
-                          <ExpandMoreIcon
+                          <Tooltip title={subItem.method}>
+                            <Chip
+                              label={subItem.method === 'DELETE' ? 'DEL' : subItem.method}
+                              size="small"
+                              sx={{
+                                mr: 1,
+                                height: '18px',
+                                width: '48px',
+                                borderRadius: '4px',
+                                '& .MuiChip-label': {
+                                  px: 1,
+                                  fontSize: '0.7rem',
+                                  fontWeight: 600,
+                                  color: 'white',
+                                  width: '100%',
+                                  textAlign: 'center'
+                                },
+                                backgroundColor: subItem.method === 'GET' ? 'success.main' :
+                                  subItem.method === 'POST' ? 'primary.main' :
+                                  subItem.method === 'DELETE' ? 'error.main' :
+                                  'warning.main',
+                                opacity: isRouteExists(subItem.path) ? 1 : 0.5,
+                              }}
+                            />
+                          </Tooltip>
+                          <ListItemText 
+                            primary={subItem.text}
                             sx={{
-                              transform: expandedSubMenus.includes(item.text) ? 'rotate(180deg)' : 'none',
-                              transition: 'transform 0.2s',
+                              color: isActivePath(subItem.path) ? 'primary.main' : 'inherit',
+                              fontWeight: isActivePath(subItem.path) ? 600 : 400,
+                              opacity: isRouteExists(subItem.path) ? 1 : 0.5,
                             }}
                           />
                         </ListItemButton>
                       </ListItem>
-                      {expandedSubMenus.includes(item.text) && (
-                        <List sx={{ pl: 4 }}>
-                          {item.subItems.map((subItem) => (
-                            <ListItem key={subItem.text} disablePadding>
-                              <ListItemButton
-                                onClick={() => {
-                                  if (subItem.path && isRouteExists(subItem.path)) {
-                                    navigate(subItem.path);
-                                  }
-                                  if (isMobile) {
-                                    setMobileOpen(false);
-                                  }
-                                }}
-                                disabled={!isRouteExists(subItem.path)}
-                                sx={{
-                                  px: 0,
-                                  pl: 2,
-                                  backgroundColor: isActivePath(subItem.path) ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
-                                  '&:hover': {
-                                    backgroundColor: isActivePath(subItem.path) 
-                                      ? 'rgba(25, 118, 210, 0.12)' 
-                                      : 'rgba(0, 0, 0, 0.04)',
-                                  },
-                                  '&.Mui-disabled': {
-                                    opacity: 0.5,
-                                  },
-                                }}
-                              >
-                                <Tooltip title={subItem.method}>
-                                  <Chip
-                                    label={subItem.method === 'DELETE' ? 'DEL' : subItem.method}
-                                    size="small"
-                                    sx={{
-                                      mr: 1,
-                                      height: '18px',
-                                      width: '48px',
-                                      borderRadius: '4px',
-                                      '& .MuiChip-label': {
-                                        px: 1,
-                                        fontSize: '0.7rem',
-                                        fontWeight: 600,
-                                        color: 'white',
-                                        width: '100%',
-                                        textAlign: 'center'
-                                      },
-                                      backgroundColor: subItem.method === 'GET' ? 'success.main' :
-                                        subItem.method === 'POST' ? 'primary.main' :
-                                        subItem.method === 'DELETE' ? 'error.main' :
-                                        'warning.main',
-                                      opacity: isRouteExists(subItem.path) ? 1 : 0.5,
-                                    }}
-                                  />
-                                </Tooltip>
-                                <ListItemText 
-                                  primary={subItem.text}
-                                  sx={{
-                                    color: isActivePath(subItem.path) ? 'primary.main' : 'inherit',
-                                    fontWeight: isActivePath(subItem.path) ? 600 : 400,
-                                    opacity: isRouteExists(subItem.path) ? 1 : 0.5,
-                                  }}
-                                />
-                              </ListItemButton>
-                            </ListItem>
-                          ))}
-                        </List>
-                      )}
-                    </>
-                  ) : (
-                    <ListItem key={item.text} disablePadding>
-                      <ListItemButton
-                        onClick={() => {
-                          if (item.path && isRouteExists(item.path)) {
-                            navigate(item.path);
-                          }
-                          if (isMobile) {
-                            setMobileOpen(false);
-                          }
-                        }}
-                        disabled={!isRouteExists(item.path)}
-                        sx={{
-                          px: 0,
-                          '& .MuiListItemIcon-root': {
-                            minWidth: '40px',
-                            ml: 4,
-                          },
-                          '& .MuiListItemText-root': {
-                            mr: 0,
-                            pr: 0.5,
-                          },
-                          backgroundColor: item.path ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.08)' : 'transparent') : 'transparent',
-                          '&:hover': {
-                            backgroundColor: item.path 
-                              ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0, 0, 0, 0.04)')
-                              : 'rgba(0, 0, 0, 0.04)',
-                          },
-                          '&.Mui-disabled': {
-                            opacity: 0.5,
-                          },
-                        }}
-                      >
-                        <ListItemIcon>{item.icon}</ListItemIcon>
-                        <ListItemText 
-                          primary={item.text}
-                          sx={{
-                            color: item.path ? (isActivePath(item.path) ? 'primary.main' : 'inherit') : 'inherit',
-                            fontWeight: item.path ? (isActivePath(item.path) ? 600 : 400) : 400,
-                            opacity: isRouteExists(item.path) ? 1 : 0.5,
-                          }}
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  )}
-                </React.Fragment>
-              ))}
-            </List>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+                    ))}
+                  </List>
+                )}
+              </>
+            ) : (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    if (item.path && isRouteExists(item.path)) {
+                      navigate(item.path);
+                    }
+                    if (isMobile) {
+                      setMobileOpen(false);
+                    }
+                  }}
+                  disabled={!isRouteExists(item.path)}
+                  sx={{
+                    px: 0,
+                    '& .MuiListItemIcon-root': {
+                      minWidth: '40px',
+                      ml: 4,
+                    },
+                    '& .MuiListItemText-root': {
+                      mr: 0,
+                      pr: 0.5,
+                    },
+                    backgroundColor: item.path ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.08)' : 'transparent') : 'transparent',
+                    '&:hover': {
+                      backgroundColor: item.path 
+                        ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0, 0, 0, 0.04)')
+                        : 'rgba(0, 0, 0, 0.04)',
+                    },
+                    '&.Mui-disabled': {
+                      opacity: 0.5,
+                    },
+                  }}
+                >
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText 
+                    primary={item.text}
+                    sx={{
+                      color: item.path ? (isActivePath(item.path) ? 'primary.main' : 'inherit') : 'inherit',
+                      fontWeight: item.path ? (isActivePath(item.path) ? 600 : 400) : 400,
+                      opacity: isRouteExists(item.path) ? 1 : 0.5,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            )}
+          </React.Fragment>
+        ))}
+      </List>
     </div>
   );
 
