@@ -36,6 +36,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import TokenInputModal from './TokenInputModal';
+import adobeLogo from '../adobelogo.png';
 
 const drawerWidth = 280;
 
@@ -473,9 +474,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            AEM Admin API Dashboard
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <img 
+              src={adobeLogo} 
+              alt="Adobe Logo" 
+              style={{ 
+                height: '32px', 
+                marginRight: '12px',
+                filter: 'brightness(0) invert(1)' // Makes the logo white
+              }} 
+            />
+            <Typography variant="h6" noWrap component="div">
+              AEM Admin API Dashboard
+            </Typography>
+          </Box>
           <Button
             color="inherit"
             startIcon={<SettingsIcon />}
