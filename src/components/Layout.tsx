@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Drawer, 
@@ -257,6 +257,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (!path) return false;
     return existingRoutes.includes(path);
   };
+
+  // Automatically expand parent menu when a sub-item is active
+  useEffect(() => {
+    menuGroups[0].items.forEach((item) => {
+      if (item.subItems?.some(subItem => isActivePath(subItem.path))) {
+        setExpandedSubMenus(prev => 
+          prev.includes(item.text) ? prev : [...prev, item.text]
+        );
+      }
+    });
+  }, [location.pathname]);
 
   const drawer = (
     <div>

@@ -63,9 +63,9 @@ const JobListDisplay: React.FC<JobListDisplayProps> = ({
   const handleStatusClick = (jobName: string, state: string) => {
     setJobName(jobName);
     if (state.toLowerCase() === 'running') {
-      navigate('/jobs/status/');
+      navigate('/jobs/status');
     } else if (state.toLowerCase() === 'stopped') {
-      navigate('/jobs/details/');
+      navigate('/jobs/details');
     }
   };
 

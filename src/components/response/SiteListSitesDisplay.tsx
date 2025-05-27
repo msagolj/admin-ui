@@ -87,6 +87,7 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
   };
 
   const sites = responseData?.sites || [];
+  const sortedSites = [...sites].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <Box>
@@ -98,7 +99,7 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="h6">Response</Typography>
-        {sites.length > 0 && (
+        {sortedSites.length > 0 && (
           <Box>
             <ButtonGroup size="small">
               <Button
@@ -113,14 +114,14 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
         )}
       </Box>
 
-      {sites.length === 0 ? (
+      {sortedSites.length === 0 ? (
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
           No sites found for this organization.
         </Typography>
       ) : showRaw ? (
         <Paper sx={{ p: 2, mt: 2 }}>
           <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify(responseData, null, 2)}
+            {JSON.stringify({ ...responseData, sites: sortedSites }, null, 2)}
           </pre>
         </Paper>
       ) : (
@@ -134,7 +135,7 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {sites.map((site) => (
+              {sortedSites.map((site) => (
                 <TableRow key={site.name}>
                   <TableCell>
                     <IconButton
