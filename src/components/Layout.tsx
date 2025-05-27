@@ -73,7 +73,7 @@ const existingRoutes = [
   '/site-config/read',
   '/site-config/update',
   '/site-config/delete',
-  ...(process.env.NODE_ENV === 'development' ? ['/site-config/create'] : []),
+  '/site-config/create',
   '/jobs/list',
   '/jobs/status',
   '/jobs/details',

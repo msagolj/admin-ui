@@ -14,21 +14,8 @@ export async function apiCall(
     ...requestDetails.headers,
   };
   
-  let fullUrl = '';
-  // Use proxy URL in development
-  if (process.env.NODE_ENV === 'development') {
-    // Extract just the path part from the URL
-    const urlPath = requestDetails.url.replace('https://admin.hlx.page', '');
-    const baseUrl = '/api';
-    // Ensure we have a single leading slash
-    const cleanPath = urlPath.startsWith('/') ? urlPath : `/${urlPath}`;
-    fullUrl = `${baseUrl}${cleanPath}`;
-  } else {
-    fullUrl = requestDetails.url;
-  }
-
   try {
-    const response = await fetch(fullUrl, {
+    const response = await fetch(requestDetails.url, {
       method: requestDetails.method,
       headers: requestDetails.headers,
       credentials: 'include',
