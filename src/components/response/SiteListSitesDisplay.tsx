@@ -18,8 +18,10 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RequestDisplay from '../RequestDisplay';
 import { useResource } from '../../context/ResourceContext';
+import { apiCall } from '../../utils/api';
 
 interface Site {
   name: string;
@@ -44,7 +46,7 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
 }) => {
   const [showRaw, setShowRaw] = useState(false);
   const navigate = useNavigate();
-  const { setSite } = useResource();
+  const { setSite, owner } = useResource();
 
   const handleViewConfig = (siteName: string) => {
     setSite(siteName);
@@ -59,6 +61,29 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
   const handleDeleteConfig = (siteName: string) => {
     setSite(siteName);
     navigate('/site-config/delete');
+  };
+
+  const handleCopyConfig = async (siteName: string) => {
+    try {
+      const details = {
+        url: `https://admin.hlx.page/config/${owner}/sites/${siteName}.json`,
+        method: 'GET',
+        headers: {},
+        queryParams: {},
+        body: null
+      };
+      
+      const { responseData } = await apiCall(details);
+      if (responseData) {
+        // Store the config in sessionStorage
+        sessionStorage.setItem('copiedSiteConfig', JSON.stringify(responseData));
+        // Navigate to create page
+        setSite('');
+        navigate('/site-config/create');
+      }
+    } catch (error) {
+      console.error('Error copying site config:', error);
+    }
   };
 
   const sites = responseData?.sites || [];
@@ -132,6 +157,13 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
                       title="Edit Site Config"
                     >
                       <EditIcon />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleCopyConfig(site.name)}
+                      title="Copy Site Config"
+                    >
+                      <ContentCopyIcon />
                     </IconButton>
                   </TableCell>
                   <TableCell>{site.name}</TableCell>
