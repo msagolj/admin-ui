@@ -13,7 +13,7 @@ import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
-import ResponseDisplay from '../components/response/ResponseDisplay';
+import SiteReadDisplay from '../components/response/SiteReadDisplay';
 import SiteInputs from 'components/SiteInputs';
 
 const SiteConfigReadConfig: React.FC = () => {
@@ -109,7 +109,7 @@ const SiteConfigReadConfig: React.FC = () => {
       />
 
       {status && (
-        <ResponseDisplay
+        <SiteReadDisplay
           requestDetails={requestDetails}
           responseData={responseData}
           responseStatus={status}
