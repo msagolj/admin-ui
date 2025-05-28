@@ -21,7 +21,22 @@ const RequestDisplay: React.FC<{
   const [copyCurlSuccess, setCopyCurlSuccess] = useState(false);
 
   const copyCurl = async () => {
-    const curlCommand = `curl -v -X ${method} "${url}" \\
+    // Add query parameters to URL if they exist
+    let fullUrl = url;
+    if (queryParams) {
+      const params = new URLSearchParams();
+      Object.entries(queryParams).forEach(([key, value]) => {
+        if (value) {
+          params.append(key, value as string);
+        }
+      });
+      const queryString = params.toString();
+      if (queryString) {
+        fullUrl += (fullUrl.includes('?') ? '&' : '?') + queryString;
+      }
+    }
+
+    const curlCommand = `curl -v -X ${method} "${fullUrl}" \\
   ${Object.entries(headers)
     .map(([key, value]) => `-H "${key}: ${value}"`)
     .join(' \\\n  ')} \\
