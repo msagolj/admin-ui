@@ -33,6 +33,7 @@ import JobList from './pages/JobList';
 import JobStatus from './pages/JobStatus';
 import JobStatusDetails from './pages/JobStatusDetails';
 import JobStop from './pages/JobStop';
+import LogsGetLogs from './pages/LogsGetLogs';
 
 const theme = createTheme({
   palette: {
@@ -68,6 +69,7 @@ const App: React.FC = () => {
                 <Route path="/site-config/create" element={<SiteConfigCreateConfig />} />
                 <Route path="/site-config/update" element={<SiteConfigUpdateSiteConfig />} />
                 <Route path="/site-config/delete" element={<SiteConfigDeleteConfig />} />
+                <Route path="/logs/get" element={<LogsGetLogs />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
                 <Route path="/preview/update" element={<PreviewUpdate />} />
                 <Route path="/preview/delete" element={<PreviewDelete />} />

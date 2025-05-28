@@ -65,6 +65,7 @@ const existingRoutes = [
   '/site-config/update',
   '/site-config/delete',
   '/site-config/create',
+  '/logs/get',
   '/jobs/list',
   '/jobs/status',
   '/jobs/details',
@@ -161,7 +162,6 @@ const menuGroups: MenuGroup[] = [
         icon: <DescriptionIcon />,
         subItems: [
           { text: 'Get Logs', path: '/logs/get', method: 'GET' },
-          { text: 'Add Logs', path: '/logs/add', method: 'POST' }
         ]
       },
       {
