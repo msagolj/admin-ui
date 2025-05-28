@@ -11,6 +11,7 @@ interface ResourceInputsProps {
   readOnlyRepo?: boolean;
   readOnlyRef?: boolean;
   readOnlyPath?: boolean;
+  hidePath?: boolean;
 }
 
 const ResourceInputs: React.FC<ResourceInputsProps> = ({
@@ -22,6 +23,7 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
   readOnlyRepo = false,
   readOnlyRef = false,
   readOnlyPath = false,
+  hidePath = false,
 }) => {
   const { 
     owner, setOwner, 
@@ -68,9 +70,9 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Owner"
               required
-          onChange={(e) => setOwner(e.target.value)}
-          placeholder="Repository owner"
-          helperText="Repository owner (e.g., organization or user name)"
+              onChange={(e) => setOwner(e.target.value)}
+              placeholder="Repository owner"
+              helperText="Repository owner (e.g., organization or user name)"
               InputProps={{ ...params.InputProps, readOnly: readOnlyOwner }}
             />
           )}
@@ -89,9 +91,9 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Repository"
               required
-          onChange={(e) => setRepo(e.target.value)}
-          placeholder="Repository name"
-          helperText="Name of the repository"
+              onChange={(e) => setRepo(e.target.value)}
+              placeholder="Repository name"
+              helperText="Name of the repository"
               InputProps={{ ...params.InputProps, readOnly: readOnlyRepo }}
             />
           )}
@@ -110,35 +112,37 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               fullWidth
               label="Reference"
               required
-          onChange={(e) => setRef(e.target.value)}
-          placeholder="Branch or ref"
-          helperText="Ref (branch) of repository"
+              onChange={(e) => setRef(e.target.value)}
+              placeholder="Branch or ref"
+              helperText="Ref (branch) of repository"
               InputProps={{ ...params.InputProps, readOnly: readOnlyRef }}
             />
           )}
         />
       </Box>
 
-      <Box sx={{ flex: 1 }}>
-        <Autocomplete
-          freeSolo
-          options={pathHistory}
-          value={path}
-          onChange={(_, newValue) => setPath(newValue || '')}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              fullWidth
-              label="Path"
-              required
-          onChange={(e) => setPath(e.target.value)}
-          placeholder="Resource path"
-          helperText="Relative path of the resource"
-              InputProps={{ ...params.InputProps, readOnly: readOnlyPath }}
-            />
-          )}
-        />
-      </Box>
+      {!hidePath && (
+        <Box sx={{ flex: 1 }}>
+          <Autocomplete
+            freeSolo
+            options={pathHistory}
+            value={path}
+            onChange={(_, newValue) => setPath(newValue || '')}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                fullWidth
+                label="Path"
+                required
+                onChange={(e) => setPath(e.target.value)}
+                placeholder="Resource path"
+                helperText="Relative path of the resource"
+                InputProps={{ ...params.InputProps, readOnly: readOnlyPath }}
+              />
+            )}
+          />
+        </Box>
+      )}
     </Box>
   );
 };
