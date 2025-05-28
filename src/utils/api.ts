@@ -13,9 +13,24 @@ export async function apiCall(
     }),
     ...requestDetails.headers,
   };
+
+  // Add query parameters to URL if they exist
+  let url = requestDetails.url;
+  if (requestDetails.queryParams) {
+    const params = new URLSearchParams();
+    Object.entries(requestDetails.queryParams).forEach(([key, value]) => {
+      if (value) {
+        params.append(key, value as string);
+      }
+    });
+    const queryString = params.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  }
   
   try {
-    const response = await fetch(requestDetails.url, {
+    const response = await fetch(url, {
       method: requestDetails.method,
       headers: requestDetails.headers,
       credentials: 'include',
