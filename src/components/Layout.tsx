@@ -69,7 +69,8 @@ const existingRoutes = [
   '/jobs/list',
   '/jobs/status',
   '/jobs/details',
-  '/jobs/stop'
+  '/jobs/stop',
+  '/sitemap/generate'
 ];
 
 interface SubMenuItem {

@@ -34,6 +34,7 @@ import JobStatus from './pages/JobStatus';
 import JobStatusDetails from './pages/JobStatusDetails';
 import JobStop from './pages/JobStop';
 import LogsGetLogs from './pages/LogsGetLogs';
+import SitemapGenerate from './pages/SitemapGenerate';
 
 const theme = createTheme({
   palette: {
@@ -86,6 +87,7 @@ const App: React.FC = () => {
                 <Route path="/jobs/status" element={<JobStatus />} />
                 <Route path="/jobs/details" element={<JobStatusDetails />} />
                 <Route path="/jobs/stop" element={<JobStop />} />
+                <Route path="/sitemap/generate" element={<SitemapGenerate />} />
               </Routes>
             </Layout>
           </Router>
