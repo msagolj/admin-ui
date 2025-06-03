@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { Box, Typography } from '@mui/material';
 
@@ -11,13 +11,17 @@ interface JsonEditorProps {
   helperText?: string;
 }
 
-const JsonEditor: React.FC<JsonEditorProps> = ({ 
+interface JsonEditorRef {
+  getLatestValue: () => any;
+}
+
+const JsonEditor = forwardRef<JsonEditorRef, JsonEditorProps>(({ 
   value, 
   onChange, 
   label,
   required,
   helperText 
-}) => {
+}, ref) => {
   const [internalValue, setInternalValue] = useState<string>('');
   const editorRef = useRef<any>(null);
 
@@ -38,6 +42,24 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
       }
     });
   };
+
+  // Method to get the latest value from the editor
+  const getLatestValue = () => {
+    if (editorRef.current) {
+      const currentValue = editorRef.current.getValue();
+      try {
+        return JSON.parse(currentValue);
+      } catch (err) {
+        return currentValue;
+      }
+    }
+    return value;
+  };
+
+  // Expose the getLatestValue method to parent components
+  React.useImperativeHandle(ref, () => ({
+    getLatestValue
+  }));
 
   return (
     <Box>
@@ -78,6 +100,6 @@ const JsonEditor: React.FC<JsonEditorProps> = ({
       )}
     </Box>
   );
-};
+});
 
 export default JsonEditor; 

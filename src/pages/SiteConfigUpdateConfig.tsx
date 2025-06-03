@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -33,6 +33,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
     queryParams: Record<string, string>;
     body: any;
   } | null>(null);
+  const jsonEditorRef = useRef<any>(null);
 
   // Fetch current config when component mounts or owner/site changes
   useEffect(() => {
@@ -43,10 +44,10 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
           method: 'GET',
           headers: {},
           queryParams: {},
-        body: null
+          body: null
         };
         try {
-          const { status , responseData } = await apiCall(details);
+          const { status, responseData } = await apiCall(details);
           if (status === 200) {
             setConfig(responseData);
           }
@@ -70,14 +71,8 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
       }
     }
 
-    // Parse the config to ensure it's valid JSON
-    let parsedConfig;
-    try {
-      parsedConfig = typeof config === 'string' ? JSON.parse(config) : config;
-    } catch (error) {
-      handleError(error, 'Invalid JSON configuration');
-      return;
-    }
+    // Get the latest value from the editor
+    const latestConfig = jsonEditorRef.current?.getLatestValue() || config;
 
     const details = {
       url: `https://admin.hlx.page/config/${owner}/sites/${site}.json`,
@@ -86,7 +81,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
         'Content-Type': 'application/json'
       },
       queryParams,
-      body: parsedConfig
+      body: latestConfig
     };
     setRequestDetails(details);
     executeSubmit(details);
@@ -106,6 +101,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <SiteInputs />
             <JsonEditor
+              ref={jsonEditorRef}
               value={config}
               onChange={setConfig}
               label="Site Configuration"
