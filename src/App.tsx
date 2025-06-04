@@ -17,6 +17,8 @@ import SiteConfigReadConfig from './pages/SiteConfigReadConfig';
 import SiteConfigUpdateSiteConfig from './pages/SiteConfigUpdateConfig';
 import SiteConfigCreateConfig from './pages/SiteConfigCreateConfig';
 import SiteConfigDeleteConfig from './pages/SiteConfigDeleteConfig';
+import SiteConfigReadRobotsTxt from './pages/SiteConfigReadRobotsTxt';
+import SiteConfigUpdateRobotsTxt from './pages/SiteConfigUpdateRobotsTxt';
 import PreviewStatus from './pages/PreviewStatus';
 import PreviewUpdate from './pages/PreviewUpdate';
 import PreviewDelete from './pages/PreviewDelete';
@@ -70,6 +72,8 @@ const App: React.FC = () => {
                 <Route path="/site-config/create" element={<SiteConfigCreateConfig />} />
                 <Route path="/site-config/update" element={<SiteConfigUpdateSiteConfig />} />
                 <Route path="/site-config/delete" element={<SiteConfigDeleteConfig />} />
+                <Route path="/site-config/read-robots-txt" element={<SiteConfigReadRobotsTxt />} />
+                <Route path="/site-config/update-robots-txt" element={<SiteConfigUpdateRobotsTxt />} />
                 <Route path="/logs/get" element={<LogsGetLogs />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
                 <Route path="/preview/update" element={<PreviewUpdate />} />

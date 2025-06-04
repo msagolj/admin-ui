@@ -7,7 +7,7 @@ export async function apiCall(
 
   // Add tokens to requestDetails.headers
   requestDetails.headers = {
-    'content-type': 'application/json',
+    ...(requestDetails.body && !requestDetails.headers?.['content-type'] && { 'content-type': 'application/json' }),
     ...(token && { 
       'x-auth-token': token
     }),
@@ -35,7 +35,11 @@ export async function apiCall(
       headers: requestDetails.headers,
       credentials: 'include',
       mode: 'cors',
-      ...(requestDetails.body && { body: JSON.stringify(requestDetails.body) })
+      ...(requestDetails.body && { 
+        body: requestDetails.headers['content-type']?.includes('application/json') 
+          ? JSON.stringify(requestDetails.body)
+          : requestDetails.body
+      })
     });
 
     if (!response.ok) {
@@ -51,7 +55,15 @@ export async function apiCall(
     if (response.status === 204) {
       return { status: 204, responseData: {} };
     }
-    // some api calls return no data (eg. purge live cache), so we need to handle that
+
+    // Handle text/plain responses
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('text/plain')) {
+      const text = await response.text();
+      return { status: response.status, responseData: text };
+    }
+
+    // Handle JSON responses
     let data = {};
     try {
       data = await response.json();
