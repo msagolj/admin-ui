@@ -6,8 +6,12 @@ import {
   Divider,
   Button,
   ButtonGroup,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate, useLocation } from 'react-router-dom';
 import RequestDisplay from '../RequestDisplay';
 
 const RobotsDisplay: React.FC<{
@@ -17,6 +21,12 @@ const RobotsDisplay: React.FC<{
 }> = (props) => {
   const { requestDetails, responseData, responseStatus } = props;
   const [showRaw, setShowRaw] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleEdit = () => {
+    navigate('/site-config/update-robots-txt');
+  };
 
   const formatRobotsTxt = (content: string): React.ReactNode => {
     if (!content) return null;
@@ -82,9 +92,9 @@ const RobotsDisplay: React.FC<{
 
       <Divider sx={{ my: 2 }} />
 
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">Response</Typography>
-        <Box>
+      <Box sx={{ mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="h6">Response</Typography>
           <ButtonGroup size="small">
             <Button
               startIcon={<VisibilityIcon />}
@@ -95,6 +105,15 @@ const RobotsDisplay: React.FC<{
             </Button>
           </ButtonGroup>
         </Box>
+        {location.pathname === '/site-config/read-robots-txt' && (
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Edit Robots.txt">
+              <IconButton onClick={handleEdit} size="small">
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
       </Box>
 
       <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
