@@ -40,41 +40,6 @@ import adobeLogo from '../adobelogo.png';
 
 const drawerWidth = 280;
 
-const existingRoutes = [
-  '/status/general',
-  '/status/bulk',
-  '/preview/status',
-  '/preview/update',
-  '/preview/delete',
-  '/preview/bulk',
-  '/publish/status',
-  '/publish/resource',
-  '/publish/unpublish',
-  '/publish/bulk',
-  '/code/status',
-  '/code/update',
-  '/code/delete',
-  '/cache/purge',
-  '/index/status',
-  '/index/reindex',
-  '/index/remove',
-  '/org-config/read',
-  '/org-config/users',
-  '/site-config/list',
-  '/site-config/read',
-  '/site-config/update',
-  '/site-config/delete',
-  '/site-config/create',
-  '/site-config/read-robots-txt',
-  '/site-config/update-robots-txt',
-  '/logs/get',
-  '/jobs/list',
-  '/jobs/status',
-  '/jobs/details',
-  '/jobs/stop',
-  '/sitemap/generate'
-];
-
 interface SubMenuItem {
   text: string;
   path: string;
@@ -183,16 +148,9 @@ const menuGroups: MenuGroup[] = [
         subItems: [
           { text: 'Read Org Config', path: '/org-config/read', method: 'GET' },
           { text: 'List Users', path: '/org-config/users', method: 'GET' },
-          { text: 'Update Org Config', path: '/org-config/update', method: 'POST' },
-          { text: 'Create Org Config', path: '/org-config/create', method: 'PUT' },
-          { text: 'Delete Org Config', path: '/org-config/delete', method: 'DELETE' },
-          { text: 'Create User', path: '/org-config/users/create', method: 'POST' },
-          { text: 'Read User', path: '/org-config/users/read', method: 'GET' },
-          { text: 'Delete User', path: '/org-config/users/delete', method: 'DELETE' },
-          { text: 'List Secrets', path: '/org-config/secrets/list', method: 'GET' },
-          { text: 'Create Secret', path: '/org-config/secrets/create', method: 'POST' },
-          { text: 'Read Secret', path: '/org-config/secrets/read', method: 'GET' },
-          { text: 'Delete Secret', path: '/org-config/secrets/delete', method: 'DELETE' }
+
+
+
         ]
       },
       {
@@ -205,12 +163,8 @@ const menuGroups: MenuGroup[] = [
           { text: 'Create Site Config', path: '/site-config/create', method: 'PUT' },
           { text: 'Delete Site Config', path: '/site-config/delete', method: 'DELETE' },
           { text: 'Read Robots.txt', path: '/site-config/read-robots-txt', method: 'GET' },
-          { text: 'Update Robots.txt', path: '/site-config/update-robots-txt', method: 'POST' },
-          { text: 'List Access Tokens', path: '/site-config/tokens/list', method: 'GET' },
-          { text: 'Create Token', path: '/site-config/tokens/create', method: 'POST' },
-          { text: 'Read Token', path: '/site-config/tokens/read', method: 'GET' },
-          { text: 'Delete Token', path: '/site-config/tokens/delete', method: 'DELETE' },
-          { text: 'List Secrets', path: '/site-config/secrets/list', method: 'GET' }
+          { text: 'Update Robots.txt', path: '/site-config/update-robots-txt', method: 'POST' }
+
         ]
       },
     ]
@@ -255,11 +209,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isActivePath = (path?: string) => {
     if (!path) return false;
     return location.pathname === path;
-  };
-
-  const isRouteExists = (path?: string) => {
-    if (!path) return false;
-    return existingRoutes.includes(path);
   };
 
   // Automatically expand parent menu when a sub-item is active
@@ -326,14 +275,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       <ListItem key={subItem.text} disablePadding>
                         <ListItemButton
                           onClick={() => {
-                            if (subItem.path && isRouteExists(subItem.path)) {
+                            if (subItem.path) {
                               navigate(subItem.path);
                             }
                             if (isMobile) {
                               setMobileOpen(false);
                             }
                           }}
-                          disabled={!isRouteExists(subItem.path)}
                           sx={{
                             px: 0,
                             pl: 2,
@@ -342,9 +290,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                               backgroundColor: isActivePath(subItem.path) 
                                 ? 'rgba(25, 118, 210, 0.12)' 
                                 : 'rgba(0, 0, 0, 0.04)',
-                            },
-                            '&.Mui-disabled': {
-                              opacity: 0.5,
                             },
                           }}
                         >
@@ -369,7 +314,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                                   subItem.method === 'POST' ? 'primary.main' :
                                   subItem.method === 'DELETE' ? 'error.main' :
                                   'warning.main',
-                                opacity: isRouteExists(subItem.path) ? 1 : 0.5,
                               }}
                             />
                           </Tooltip>
@@ -378,7 +322,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             sx={{
                               color: isActivePath(subItem.path) ? 'primary.main' : 'inherit',
                               fontWeight: isActivePath(subItem.path) ? 600 : 400,
-                              opacity: isRouteExists(subItem.path) ? 1 : 0.5,
                             }}
                           />
                         </ListItemButton>
@@ -391,14 +334,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <ListItem key={item.text} disablePadding>
                 <ListItemButton
                   onClick={() => {
-                    if (item.path && isRouteExists(item.path)) {
+                    if (item.path) {
                       navigate(item.path);
                     }
                     if (isMobile) {
                       setMobileOpen(false);
                     }
                   }}
-                  disabled={!isRouteExists(item.path)}
                   sx={{
                     px: 0,
                     '& .MuiListItemIcon-root': {
@@ -415,9 +357,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         ? (isActivePath(item.path) ? 'rgba(25, 118, 210, 0.12)' : 'rgba(0, 0, 0, 0.04)')
                         : 'rgba(0, 0, 0, 0.04)',
                     },
-                    '&.Mui-disabled': {
-                      opacity: 0.5,
-                    },
                   }}
                 >
                   <ListItemIcon>{item.icon}</ListItemIcon>
@@ -426,7 +365,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     sx={{
                       color: item.path ? (isActivePath(item.path) ? 'primary.main' : 'inherit') : 'inherit',
                       fontWeight: item.path ? (isActivePath(item.path) ? 600 : 400) : 400,
-                      opacity: isRouteExists(item.path) ? 1 : 0.5,
                     }}
                   />
                 </ListItemButton>
