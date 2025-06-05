@@ -148,9 +148,6 @@ const menuGroups: MenuGroup[] = [
         subItems: [
           { text: 'Read Org Config', path: '/org-config/read', method: 'GET' },
           { text: 'List Users', path: '/org-config/users', method: 'GET' },
-
-
-
         ]
       },
       {
@@ -163,8 +160,10 @@ const menuGroups: MenuGroup[] = [
           { text: 'Create Site Config', path: '/site-config/create', method: 'PUT' },
           { text: 'Delete Site Config', path: '/site-config/delete', method: 'DELETE' },
           { text: 'Read Robots.txt', path: '/site-config/read-robots-txt', method: 'GET' },
-          { text: 'Update Robots.txt', path: '/site-config/update-robots-txt', method: 'POST' }
-
+          { text: 'Update Robots.txt', path: '/site-config/update-robots-txt', method: 'POST' },
+          { text: 'List Site API Keys', path: '/site-config/list-api-keys', method: 'GET' },
+          { text: 'Create Site API Key', path: '/site-config/create-api-key', method: 'POST' },
+          { text: 'Delete Site API Key', path: '/site-config/delete-api-key', method: 'DELETE' },
         ]
       },
     ]

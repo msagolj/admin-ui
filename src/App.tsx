@@ -37,6 +37,9 @@ import JobStatusDetails from './pages/JobStatusDetails';
 import JobStop from './pages/JobStop';
 import LogsGetLogs from './pages/LogsGetLogs';
 import SitemapGenerate from './pages/SitemapGenerate';
+import SiteConfigListAPIKeys from './pages/SiteConfigListAPIKeys';
+import SiteConfigCreateAPIKey from './pages/SiteConfigCreateAPIKey';
+import SiteConfigDeleteAPIKey from './pages/SiteConfigDeleteAPIKey';
 
 const theme = createTheme({
   palette: {
@@ -74,6 +77,9 @@ const App: React.FC = () => {
                 <Route path="/site-config/delete" element={<SiteConfigDeleteConfig />} />
                 <Route path="/site-config/read-robots-txt" element={<SiteConfigReadRobotsTxt />} />
                 <Route path="/site-config/update-robots-txt" element={<SiteConfigUpdateRobotsTxt />} />
+                <Route path="/site-config/list-api-keys" element={<SiteConfigListAPIKeys />} />
+                <Route path="/site-config/create-api-key" element={<SiteConfigCreateAPIKey />} />
+                <Route path="/site-config/delete-api-key" element={<SiteConfigDeleteAPIKey />} />
                 <Route path="/logs/get" element={<LogsGetLogs />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
                 <Route path="/preview/update" element={<PreviewUpdate />} />

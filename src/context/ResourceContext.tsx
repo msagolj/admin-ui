@@ -15,6 +15,8 @@ interface ResourceContextType {
   setSite: (value: string) => void;
   jobName: string;
   setJobName: (value: string) => void;
+  apiKeyId: string;
+  setApiKeyId: (value: string) => void;
   ownerHistory: string[];
   repoHistory: string[];
   refHistory: string[];
@@ -50,6 +52,7 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [topic, setTopic] = useState(() => localStorage.getItem('resource_topic') || '');
   const [site, setSite] = useState(() => localStorage.getItem('resource_site') || '');
   const [jobName, setJobName] = useState(() => localStorage.getItem('resource_jobName') || '');
+  const [apiKeyId, setApiKeyId] = useState(() => localStorage.getItem('resource_apiKeyId') || '');
 
   // Initialize history from localStorage
   const [ownerHistory, setOwnerHistory] = useState(() => getStoredHistory('resource_owner'));
@@ -69,7 +72,8 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('resource_topic', topic);
     localStorage.setItem('resource_site', site);
     localStorage.setItem('resource_jobName', jobName);
-  }, [owner, repo, ref, path, topic, site, jobName]);
+    localStorage.setItem('resource_apiKeyId', apiKeyId);
+  }, [owner, repo, ref, path, topic, site, jobName, apiKeyId]);
 
   const updateHistory = () => {
     if (owner) {
@@ -112,6 +116,8 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setSite,
         jobName,
         setJobName,
+        apiKeyId,
+        setApiKeyId,
         ownerHistory,
         repoHistory,
         refHistory,
