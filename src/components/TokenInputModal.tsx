@@ -11,7 +11,8 @@ import {
   Menu,
   MenuItem,
   CircularProgress,
-  IconButton
+  IconButton,
+  Link
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import LoginIcon from '@mui/icons-material/Login';
@@ -137,6 +138,17 @@ const TokenInputModal: React.FC<TokenInputModalProps> = ({ open, onClose, onSubm
               )}
             </Menu>
           </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: '0.75rem' }}>
+            • click on<LoginIcon sx={{ fontSize: '1rem', verticalAlign: 'middle', mx: 0.5 }} />
+            <br />
+            • select a provider and log in
+            <br />
+            • on the response page, open developer console
+            <br />
+            • extract token from cookie, paste it in the input field
+            <br/><br/>
+            <hr/>
+          </Typography>
           <TextField
             margin="dense"
             label="AEM Token (Optional)"
@@ -144,8 +156,18 @@ const TokenInputModal: React.FC<TokenInputModalProps> = ({ open, onClose, onSubm
             fullWidth
             value={aemToken}
             onChange={(e) => setAemToken(e.target.value)}
-            helperText="Additional authentication token for AEM content source access (check ../validate_token -> payload -> token)"
+  
           />
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: '0.75rem' }}>
+            <br />
+            For <Link href="#/preview/update" color="primary" underline="hover">Update Preview</Link> call (with AEM as a content source) you also require an AEM Token:
+            <br />
+            • open your AEMaaCS instance in separate window
+            <br />
+            • open developer console,on network tab, filter for 'token'
+            <br />
+            • extract the token from payload, paste it in the input field
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
