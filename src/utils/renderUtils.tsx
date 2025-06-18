@@ -52,7 +52,7 @@ export const renderValue = (key: string, value: any): React.ReactNode|string|any
   }
 
   // Check if the value is a date string
-  if (typeof value === 'string' && (key.includes('date') || key.includes('modified'))) {
+  if (typeof value === 'string' && (key.includes('date') || key === 'Last Modified')) {
     return formatDate(value);
   }
 
