@@ -12,18 +12,18 @@ can use the app directly
   - click on 'Login Options' next to the `AEM Admin API Token` input field
   - select a provider
   - login
-  - open dev console for login window
+  - open developer console for login window
   - extract token from cookie
   - paste it in the input field
   - Save
 
   After that you can use the API calls that require the token.
-- Some API Calls (UpdatePreview) require an AEM Token:
+- For UpdatePreview call with AEM as a content source you also require an AEM Token:
   - click on `Settings`
-  - in a seperate window opeen your AEMaaCS instance
+  - in a seperate window open your AEMaaCS instance
   - open dev console
-  - on network filter for token
-  - extract the token 
+  - on network tab, filter for 'token'
+  - extract the token from payload
   - paste it in the input field
   - Save
 
