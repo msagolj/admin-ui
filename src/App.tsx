@@ -40,6 +40,11 @@ import SitemapGenerate from './pages/SitemapGenerate';
 import SiteConfigListAPIKeys from './pages/SiteConfigListAPIKeys';
 import SiteConfigCreateAPIKey from './pages/SiteConfigCreateAPIKey';
 import SiteConfigDeleteAPIKey from './pages/SiteConfigDeleteAPIKey';
+import ProfileConfigCreateProfile from './pages/ProfileConfigCreateProfile';
+import ProfileConfigListProfiles from './pages/ProfileConfigListProfiles';
+import ProfileConfigReadProfile from './pages/ProfileConfigReadProfile';
+import ProfileConfigUpdateProfile from './pages/ProfileConfigUpdateProfile';
+import ProfileConfigDeleteProfile from './pages/ProfileConfigDeleteProfile';
 
 const theme = createTheme({
   palette: {
@@ -80,6 +85,11 @@ const App: React.FC = () => {
                 <Route path="/site-config/list-api-keys" element={<SiteConfigListAPIKeys />} />
                 <Route path="/site-config/create-api-key" element={<SiteConfigCreateAPIKey />} />
                 <Route path="/site-config/delete-api-key" element={<SiteConfigDeleteAPIKey />} />
+                <Route path="/profile-config/list" element={<ProfileConfigListProfiles />} />
+                <Route path="/profile-config/read" element={<ProfileConfigReadProfile />} />
+                <Route path="/profile-config/update" element={<ProfileConfigUpdateProfile />} />
+                <Route path="/profile-config/delete" element={<ProfileConfigDeleteProfile />} />
+                <Route path="/profile-config/create" element={<ProfileConfigCreateProfile />} />
                 <Route path="/logs/get" element={<LogsGetLogs />} />
                 <Route path="/preview/status" element={<PreviewStatus />} />
                 <Route path="/preview/update" element={<PreviewUpdate />} />

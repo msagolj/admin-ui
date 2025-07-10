@@ -33,6 +33,8 @@ import WorkIcon from '@mui/icons-material/Work';
 import BusinessIcon from '@mui/icons-material/Business';
 import WebIcon from '@mui/icons-material/Web';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import TuneIcon from '@mui/icons-material/Tune';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import TokenInputModal from './TokenInputModal';
@@ -164,6 +166,17 @@ const menuGroups: MenuGroup[] = [
           { text: 'List Site API Keys', path: '/site-config/list-api-keys', method: 'GET' },
           { text: 'Create Site API Key', path: '/site-config/create-api-key', method: 'POST' },
           { text: 'Delete Site API Key', path: '/site-config/delete-api-key', method: 'DELETE' },
+        ]
+      },
+      {
+        text: 'Profile Config',
+        icon: <TuneIcon />,
+        subItems: [
+          { text: 'List Profiles', path: '/profile-config/list', method: 'GET' },
+          { text: 'Create Profile', path: '/profile-config/create', method: 'PUT' },
+          { text: 'Read Profile', path: '/profile-config/read', method: 'GET' },
+          { text: 'Update Profile', path: '/profile-config/update', method: 'POST' },
+          { text: 'Delete Profile', path: '/profile-config/delete', method: 'DELETE' },
         ]
       },
     ]

@@ -13,6 +13,8 @@ interface ResourceContextType {
   setTopic: (value: string) => void;
   site: string;
   setSite: (value: string) => void;
+  profile: string;
+  setProfile: (value: string) => void;
   jobName: string;
   setJobName: (value: string) => void;
   apiKeyId: string;
@@ -23,6 +25,7 @@ interface ResourceContextType {
   pathHistory: string[];
   topicHistory: string[];
   siteHistory: string[];
+  profileHistory: string[];
   jobNameHistory: string[];
   updateHistory: () => void;
 }
@@ -51,6 +54,7 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [path, setPath] = useState(() => localStorage.getItem('resource_path') || '');
   const [topic, setTopic] = useState(() => localStorage.getItem('resource_topic') || '');
   const [site, setSite] = useState(() => localStorage.getItem('resource_site') || '');
+  const [profile, setProfile] = useState(() => localStorage.getItem('resource_profile') || '');
   const [jobName, setJobName] = useState(() => localStorage.getItem('resource_jobName') || '');
   const [apiKeyId, setApiKeyId] = useState(() => localStorage.getItem('resource_apiKeyId') || '');
 
@@ -61,6 +65,7 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [pathHistory, setPathHistory] = useState(() => getStoredHistory('resource_path'));
   const [topicHistory, setTopicHistory] = useState(() => getStoredHistory('resource_topic'));
   const [siteHistory, setSiteHistory] = useState(() => getStoredHistory('resource_site'));
+  const [profileHistory, setProfileHistory] = useState(() => getStoredHistory('resource_profile'));
   const [jobNameHistory, setJobNameHistory] = useState(() => getStoredHistory('resource_jobName'));
 
   // Save to localStorage when values change
@@ -71,9 +76,10 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('resource_path', path);
     localStorage.setItem('resource_topic', topic);
     localStorage.setItem('resource_site', site);
+    localStorage.setItem('resource_profile', profile);
     localStorage.setItem('resource_jobName', jobName);
     localStorage.setItem('resource_apiKeyId', apiKeyId);
-  }, [owner, repo, ref, path, topic, site, jobName, apiKeyId]);
+  }, [owner, repo, ref, path, topic, site, profile, jobName, apiKeyId]);
 
   const updateHistory = () => {
     if (owner) {
@@ -93,6 +99,9 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     if (site) {
       setSiteHistory(updateStoredHistory('resource_site', site));
+    }
+    if (profile) {
+      setProfileHistory(updateStoredHistory('resource_profile', profile));
     }
     if (jobName) {
       setJobNameHistory(updateStoredHistory('resource_jobName', jobName));
@@ -114,6 +123,8 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setTopic,
         site,
         setSite,
+        profile,
+        setProfile,
         jobName,
         setJobName,
         apiKeyId,
@@ -124,6 +135,7 @@ export const ResourceProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         pathHistory,
         topicHistory,
         siteHistory,
+        profileHistory,
         jobNameHistory,
         updateHistory,
       }}
