@@ -28,7 +28,7 @@ const TokenInputModal: React.FC<TokenInputModalProps> = ({ open, onClose, onSubm
   const [aemToken, setAemToken] = useState('');
   const [loginAnchorEl, setLoginAnchorEl] = useState<null | HTMLElement>(null);
   const [loadingLoginOptions, setLoadingLoginOptions] = useState(false);
-  const { loginOptions, login, fetchLoginOptions } = useAuth();
+  const { loginOptions, loginError, login, fetchLoginOptions } = useAuth();
   const hasInitialized = useRef(false);
 
   useEffect(() => {
@@ -106,7 +106,13 @@ const TokenInputModal: React.FC<TokenInputModalProps> = ({ open, onClose, onSubm
                 },
               }}
             >
-              {loadingLoginOptions ? (
+              {loginError ? (
+                <MenuItem disabled>
+                  <Typography variant="body2" color="error" sx={{ whiteSpace: 'normal' }}>
+                    {loginError}
+                  </Typography>
+                </MenuItem>
+              ) : loadingLoginOptions ? (
                 <MenuItem disabled>
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                     <CircularProgress size={20} />
