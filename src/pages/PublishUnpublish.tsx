@@ -14,26 +14,26 @@ import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import ConfirmDialog from '../components/ConfirmDialog';
 import ResponseDisplay from '../components/response/ResponseDisplay';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const PublishUnpublish: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
-  // Additional parameters for the request
   const [disableNotifications, setDisableNotifications] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setConfirmOpen(false);
     const details = {
-      url: `https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`,
+      url: `${ADMIN_API_BASE}/live/${owner}/${site}/${ref}/${path}`,
       method: 'DELETE',
       headers: {},
       queryParams: {
@@ -41,7 +41,6 @@ const PublishUnpublish: React.FC = () => {
       },
       body: null,
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -69,7 +68,7 @@ const PublishUnpublish: React.FC = () => {
             />
             <ApiUrlDisplay
               method="DELETE"
-              url={`https://admin.hlx.page/live/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`${ADMIN_API_BASE}/live/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
@@ -86,10 +85,7 @@ const PublishUnpublish: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 
@@ -100,6 +96,14 @@ const PublishUnpublish: React.FC = () => {
           responseStatus={status}
         />
       )}
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm Un-publish"
+        message="Are you sure you want to un-publish this resource? This action cannot be undone."
+        confirmLabel="Un-publish"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Box>
   );
 };

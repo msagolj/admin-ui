@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 
 interface LoginOption {
   name: string;
@@ -13,7 +13,10 @@ interface AuthContextType {
   login: (url: string) => void;
   logout: () => void;
   fetchLoginOptions: () => Promise<void>;
-  handleTokenSubmit: (token: string, aemToken: string) => void;
+  authToken: string;
+  setAuthToken: (token: string) => void;
+  aemToken: string;
+  setAemToken: (token: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,22 +30,35 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginOptions, setLoginOptions] = useState<LoginOption[]>([]);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [aemToken, setAemToken] = useState<string | null>(null);
+  const [authToken, setAuthTokenState] = useState(() => localStorage.getItem('authToken') || '');
+  const [aemToken, setAemTokenState] = useState(() => localStorage.getItem('aemToken') || '');
   const retryAfterRef = useRef<number>(0);
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    const storedAemToken = localStorage.getItem('aemToken');
-    if (storedToken) {
-      setToken(storedToken);
-      setIsAuthenticated(true);
+  const isAuthenticated = !!authToken;
+
+  const setAuthToken = useCallback((token: string) => {
+    const trimmed = token.trim();
+    setAuthTokenState(trimmed);
+    if (trimmed) {
+      localStorage.setItem('authToken', trimmed);
+    } else {
+      localStorage.removeItem('authToken');
     }
-    if (storedAemToken) {
-      setAemToken(storedAemToken);
+  }, []);
+
+  const setAemToken = useCallback((token: string) => {
+    const formatted = token.trim() === ''
+      ? ''
+      : token.trim().startsWith('Bearer ')
+        ? token.trim()
+        : `Bearer ${token.trim()}`;
+    setAemTokenState(formatted);
+    if (formatted) {
+      localStorage.setItem('aemToken', formatted);
+    } else {
+      localStorage.removeItem('aemToken');
     }
   }, []);
 
@@ -59,11 +75,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await fetch('https://admin.hlx.page/login', {
         credentials: 'include',
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers: { 'Accept': 'application/json' },
       });
-      
+
       if (!response.ok) {
         const retryAfter = response.headers.get('x-retry-after') || response.headers.get('retry-after');
         if (retryAfter) {
@@ -74,30 +88,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
         }
-
         if (response.status === 429) {
           const defaultRetry = 60;
           retryAfterRef.current = Date.now() + defaultRetry * 1000;
           setLoginError(`Rate limited. Please retry after ${defaultRetry}s.`);
           return;
         }
-
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (!data.links) {
         setLoginOptions([]);
         return;
       }
-      
+
       const options = Object.entries(data.links)
         .filter(([key]) => !key.toLowerCase().endsWith('sa'))
         .map(([key, url]) => {
           const name = key.replace('login_', '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           let icon = '';
-          
           if (name.toLowerCase().includes('google')) {
             icon = 'https://www.google.com/favicon.ico';
           } else if (name.toLowerCase().includes('microsoft')) {
@@ -105,14 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else if (name.toLowerCase().includes('adobe')) {
             icon = 'https://www.adobe.com/favicon.ico';
           }
-          
-          return {
-            name,
-            url: url as string,
-            icon
-          };
+          return { name, url: url as string, icon };
         });
-      
+
       setLoginOptions(options);
     } catch (error) {
       console.error('Failed to fetch login options:', error);
@@ -120,29 +126,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const login = (url: string) => {
-    // Open login URL in a new tab
+  const login = useCallback((url: string) => {
     window.open(url, '_blank');
-  };
+  }, []);
 
-  const handleTokenSubmit = (newToken: string, newAemToken: string) => {
-    setToken(newToken);
-    localStorage.setItem('authToken', newToken);
-    setIsAuthenticated(true);
-    
-    if (newAemToken) {
-      setAemToken(newAemToken);
-      localStorage.setItem('aemToken', newAemToken);
-    }
-  };
-
-  const logout = () => {
-    setToken(null);
-    setAemToken(null);
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('aemToken');
-    setIsAuthenticated(false);
-  };
+  const logout = useCallback(() => {
+    setAuthToken('');
+    setAemToken('');
+  }, [setAuthToken, setAemToken]);
 
   return (
     <AuthContext.Provider
@@ -153,10 +144,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         fetchLoginOptions,
-        handleTokenSubmit,
+        authToken,
+        setAuthToken,
+        aemToken,
+        setAemToken,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

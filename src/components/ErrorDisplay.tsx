@@ -8,11 +8,12 @@ import {
   Box
 } from '@mui/material';
 import { ErrorDetails } from '../utils/errorUtils';
+import { RequestDetails } from '../types';
 
 interface ErrorDisplayProps {
   error: ErrorDetails | null;
   onDismiss: () => void;
-  requestDetails: any;
+  requestDetails: RequestDetails | null;
 }
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error, onDismiss, requestDetails }) => {

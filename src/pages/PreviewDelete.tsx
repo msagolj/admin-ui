@@ -14,28 +14,28 @@ import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const PreviewDelete: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setConfirmOpen(false);
     const details = {
-      url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`,
+      url: `${ADMIN_API_BASE}/preview/${owner}/${site}/${ref}/${path}`,
       method: 'DELETE',
       headers: {},
       queryParams: {},
       body: null,
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -54,7 +54,7 @@ const PreviewDelete: React.FC = () => {
             <ResourceInputs />
             <ApiUrlDisplay
               method="DELETE"
-              url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`${ADMIN_API_BASE}/preview/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
@@ -71,10 +71,7 @@ const PreviewDelete: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 
@@ -85,6 +82,15 @@ const PreviewDelete: React.FC = () => {
           responseStatus={status}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm Delete Preview"
+        message="Are you sure you want to proceed? This action cannot be undone."
+        confirmLabel="Delete Preview"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Box>
   );
 };

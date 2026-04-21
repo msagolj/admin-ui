@@ -23,19 +23,13 @@ import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from '../components/response/ResponseDisplay';
 import SiteInputs from '../components/SiteInputs';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const SiteConfigDeleteAPIKey: React.FC = () => {
   const { owner, site, apiKeyId } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: formError, handleError, clearError } = useErrorHandler();
   const [apiKeyIdInput, setApiKeyIdInput] = useState(apiKeyId || '');
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,13 +48,12 @@ const SiteConfigDeleteAPIKey: React.FC = () => {
     if (!apiKeyIdInput.trim()) return;
     
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/sites/${site}/apiKeys/${apiKeyIdInput.trim()}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}/apiKeys/${apiKeyIdInput.trim()}.json`,
       method: 'DELETE',
       headers: {},
       queryParams: {},
       body: null
     };
-    setRequestDetails(details);
     executeSubmit(details);
     setOpenDialog(false);
   };
@@ -100,7 +93,7 @@ const SiteConfigDeleteAPIKey: React.FC = () => {
 
             <ApiUrlDisplay
               method="DELETE"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/sites/${site || '{site}'}/apiKeys/${apiKeyIdInput || '{apiKeyId}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/sites/${site || '{site}'}/apiKeys/${apiKeyIdInput || '{apiKeyId}'}.json`}
             />
             
             <Button
@@ -118,11 +111,7 @@ const SiteConfigDeleteAPIKey: React.FC = () => {
 
       <ErrorDisplay 
         error={error || formError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

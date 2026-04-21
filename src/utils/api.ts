@@ -1,16 +1,14 @@
 import { ApiError } from './errorUtils';
+import { RequestDetails } from '../types';
 
 export async function apiCall(
-  requestDetails: any
+  requestDetails: RequestDetails
 ): Promise<{ status: number, responseData: any}> {
   const token = localStorage.getItem('authToken');
 
-  // Add tokens to requestDetails.headers
   requestDetails.headers = {
     ...(requestDetails.body && !requestDetails.headers?.['content-type'] && { 'content-type': 'application/json' }),
-    ...(token && { 
-      'x-auth-token': token
-    }),
+    ...(token && { 'x-auth-token': token }),
     ...requestDetails.headers,
   };
 

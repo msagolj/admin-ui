@@ -12,13 +12,16 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import TerminalIcon from '@mui/icons-material/Terminal';
 import { renderValue } from '../utils/renderUtils';
+import { RequestDetails } from '../types';
 
 const RequestDisplay: React.FC<{
-  requestDetails: any;
+  requestDetails: RequestDetails | null;
 }> = (props) => {
-  const { headers, method, url, body, queryParams } = props.requestDetails;
   const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [copyCurlSuccess, setCopyCurlSuccess] = useState(false);
+
+  if (!props.requestDetails) return null;
+  const { headers, method, url, body, queryParams } = props.requestDetails;
 
   const copyCurl = async () => {
     // Add query parameters to URL if they exist

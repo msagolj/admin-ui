@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Box } from '@mui/material';
+import { Card, CardContent, Typography, Box, Link } from '@mui/material';
 import { renderValue, formatLabel } from '../utils/renderUtils';
 
 interface StatusCardProps {
@@ -49,7 +49,30 @@ const StatusCard = ({
           </Typography>
         </Box>
         {Object.entries(data).map(([key, value]) => {
-          if (key === 'status' || key === 'links') return null;
+          if (key === 'status') return null;
+          if (key === 'links' && typeof value === 'object' && value !== null) {
+            return (
+              <Box key={key} sx={{ mb: 1 }}>
+                <Typography variant="body2" color="text.primary" sx={{ fontWeight: 'bold' }}>
+                  Links
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
+                  {Object.entries(value as Record<string, string>).map(([linkKey, url]) => (
+                    <Link
+                      key={linkKey}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      variant="body2"
+                      sx={{ textTransform: 'capitalize' }}
+                    >
+                      {formatLabel(linkKey)}
+                    </Link>
+                  ))}
+                </Box>
+              </Box>
+            );
+          }
           return (
             <Box key={key} sx={{ mb: 1 }}>
               <Typography variant="body2" color="text.primary" sx={{ fontWeight: 'bold' }}>

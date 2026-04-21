@@ -10,30 +10,25 @@ import {
 } from '@mui/material';
 import PreviewIcon from '@mui/icons-material/Preview';
 import { useResource } from '../context/ResourceContext';
+import { useAuth } from '../context/AuthContext';
 import ApiUrlDisplay from '../components/ApiUrlDisplay';
 import StatusResponseDisplay from '../components/response/StatusResponseDisplay';
 import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const PreviewUpdate: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { aemToken } = useAuth();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   // Additional parameters for the request body
   const [forceUpdateRedirects, setForceUpdateRedirects] = useState(false);
   const [word2mdVersion, setWord2mdVersion] = useState('');
   const [gdocs2mdVersion, setGdocs2mdVersion] = useState('');
   const [html2mdVersion, setHtml2mdVersion] = useState('');
-  const requiresAemToken = true;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,19 +47,17 @@ const PreviewUpdate: React.FC = () => {
     }
 
     const headers: Record<string, string> = {};
-    const aemToken = localStorage.getItem('aemToken');
-    if (requiresAemToken && aemToken) {
+    if (aemToken) {
       headers['x-content-source-authorization'] = aemToken;
     }
 
     const details = {
-      url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/${path}`,
+      url: `${ADMIN_API_BASE}/preview/${owner}/${site}/${ref}/${path}`,
       method: 'POST',
       headers,
       queryParams: {},
       body: Object.keys(body).length > 0 ? body : {},
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -124,7 +117,7 @@ const PreviewUpdate: React.FC = () => {
 
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`${ADMIN_API_BASE}/preview/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
 
             <Button
@@ -141,10 +134,7 @@ const PreviewUpdate: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

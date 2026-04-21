@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -14,28 +14,21 @@ import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from '../components/response/ResponseDisplay';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const JobStatus: React.FC = () => {
-  const { owner, repo, ref, topic, jobName, setJobName } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, topic, jobName, setJobName } = useResource();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/job/${owner}/${repo}/${ref}/${topic}/${jobName}`,
+      url: `${ADMIN_API_BASE}/job/${owner}/${site}/${ref}/${topic}/${jobName}`,
       method: 'GET',
       headers: {},
       queryParams: {},
       body: null,
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -65,7 +58,7 @@ const JobStatus: React.FC = () => {
             </Box>
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/job/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${topic || '{topic}'}/${jobName || '{jobName}'}`}
+              url={`${ADMIN_API_BASE}/job/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${topic || '{topic}'}/${jobName || '{jobName}'}`}
             />
             <Button
               variant="contained"
@@ -81,10 +74,7 @@ const JobStatus: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />  
 

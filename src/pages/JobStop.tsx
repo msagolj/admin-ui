@@ -13,29 +13,29 @@ import JobResourceInputs from '../components/JobResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import ConfirmDialog from '../components/ConfirmDialog';
 import ResponseDisplay from '../components/response/ResponseDisplay';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const JobStop: React.FC = () => {
-  const { owner, repo, ref, topic, jobName, setJobName } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, topic, jobName, setJobName } = useResource();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setConfirmOpen(false);
     const details = {
-      url: `https://admin.hlx.page/job/${owner}/${repo}/${ref}/${topic}/${jobName}`,
+      url: `${ADMIN_API_BASE}/job/${owner}/${site}/${ref}/${topic}/${jobName}`,
       method: 'DELETE',
       headers: {},
       queryParams: {},
       body: null,
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -65,7 +65,7 @@ const JobStop: React.FC = () => {
             </Box>
             <ApiUrlDisplay
               method="DELETE"
-              url={`https://admin.hlx.page/job/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${topic || '{topic}'}/${jobName || '{jobName}'}`}
+              url={`${ADMIN_API_BASE}/job/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${topic || '{topic}'}/${jobName || '{jobName}'}`}
             />
             <Button
               variant="contained"
@@ -82,10 +82,7 @@ const JobStop: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 
@@ -96,6 +93,15 @@ const JobStop: React.FC = () => {
           responseStatus={status}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm Stop Job"
+        message="Are you sure you want to proceed? This action cannot be undone."
+        confirmLabel="Stop Job"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Box>
   );
 };

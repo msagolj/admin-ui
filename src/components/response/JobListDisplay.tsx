@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -9,9 +8,7 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Button,
-  Divider,
-  ButtonGroup,
+  Paper,
   keyframes,
   IconButton,
   Tooltip
@@ -19,17 +16,14 @@ import {
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RequestDisplay from '../RequestDisplay';
+import ResponseLayout from './ResponseLayout';
 import { useNavigate } from 'react-router-dom';
-import { useResource } from 'context/ResourceContext';
+import { useResource } from '../../context/ResourceContext';
+import { RequestDetails } from '../../types';
 
 const spin = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 `;
 
 interface Job {
@@ -40,22 +34,15 @@ interface Job {
 
 interface JobListDisplayProps {
   responseData: { jobs: Job[] } | null;
-  requestDetails: {
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null;
+  requestDetails: RequestDetails | null;
   responseStatus: number;
 }
 
-const JobListDisplay: React.FC<JobListDisplayProps> = ({ 
+const JobListDisplay: React.FC<JobListDisplayProps> = ({
   responseData,
   requestDetails,
   responseStatus,
 }) => {
-  const [showRaw, setShowRaw] = useState(false);
   const jobs = responseData?.jobs || [];
   const navigate = useNavigate();
   const { setJobName } = useResource();
@@ -81,40 +68,16 @@ const JobListDisplay: React.FC<JobListDisplayProps> = ({
   };
 
   return (
-    <Box>
-      <RequestDisplay
-        requestDetails={requestDetails}
-      />
-
-      <Divider sx={{ my: 2 }} />
-
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">Response</Typography>
-        {jobs.length > 0 && (
-          <Box>
-            <ButtonGroup size="small">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(!showRaw)}
-                variant={showRaw ? 'contained' : 'outlined'}
-              >
-                {showRaw ? 'Show Formatted' : 'Show Raw'}
-              </Button>
-            </ButtonGroup>
-          </Box>
-        )}
-      </Box>
-
+    <ResponseLayout
+      requestDetails={requestDetails}
+      responseData={responseData}
+      responseStatus={responseStatus}
+      showToggle={jobs.length > 0}
+    >
       {jobs.length === 0 ? (
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
           No jobs found for this repository and topic.
         </Typography>
-      ) : showRaw ? (
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify(responseData, null, 2)}
-          </pre>
-        </Paper>
       ) : (
         <TableContainer component={Paper} sx={{ mt: 2, border: 1, borderColor: 'grey.300' }}>
           <Table>
@@ -131,10 +94,7 @@ const JobListDisplay: React.FC<JobListDisplayProps> = ({
                 <TableRow key={job.name}>
                   <TableCell>
                     <Tooltip title={job.state.toLowerCase() === 'running' ? 'View Job Status' : 'View Job Results'}>
-                      <IconButton 
-                        size="small" 
-                        onClick={() => handleStatusClick(job.name, job.state)}
-                      >
+                      <IconButton size="small" onClick={() => handleStatusClick(job.name, job.state)}>
                         <VisibilityIcon />
                       </IconButton>
                     </Tooltip>
@@ -153,8 +113,8 @@ const JobListDisplay: React.FC<JobListDisplayProps> = ({
           </Table>
         </TableContainer>
       )}
-    </Box>
+    </ResponseLayout>
   );
 };
 
-export default JobListDisplay; 
+export default JobListDisplay;

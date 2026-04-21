@@ -15,17 +15,11 @@ import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const PublishResource: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, error, loading, executeSubmit } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, error, loading, executeSubmit, requestDetails } = useFormState();
 
   // Additional parameters for the request
   const [forceUpdateRedirects, setForceUpdateRedirects] = useState(false);
@@ -34,7 +28,7 @@ const PublishResource: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/live/${owner}/${repo}/${ref}/${path}`,
+      url: `${ADMIN_API_BASE}/live/${owner}/${site}/${ref}/${path}`,
       method: 'POST',
       headers: {},
       queryParams: {},
@@ -43,7 +37,6 @@ const PublishResource: React.FC = () => {
         disableNotifications
       }
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -80,7 +73,7 @@ const PublishResource: React.FC = () => {
             />
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/live/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`${ADMIN_API_BASE}/live/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"

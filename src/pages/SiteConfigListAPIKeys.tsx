@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -13,28 +13,21 @@ import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import SiteListAPIKeysDisplay from '../components/response/SiteListAPIKeysDisplay';
 import SiteInputs from '../components/SiteInputs';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const SiteConfigListAPIKeys: React.FC = () => {
   const { owner, site } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/sites/${site}/apiKeys.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}/apiKeys.json`,
       method: 'GET',
       headers: {}, // Add Auth headers if needed via useFormState or apiCall utility
       queryParams: {},
       body: null
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -53,7 +46,7 @@ const SiteConfigListAPIKeys: React.FC = () => {
             <SiteInputs />
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/sites/${site || '{site}'}/apiKeys.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/sites/${site || '{site}'}/apiKeys.json`}
             />
             <Button
               variant="contained"
@@ -69,10 +62,7 @@ const SiteConfigListAPIKeys: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

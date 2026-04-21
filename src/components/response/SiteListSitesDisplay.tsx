@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -10,18 +8,17 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Button,
-  Divider,
-  ButtonGroup,
+  Paper,
   IconButton
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import RequestDisplay from '../RequestDisplay';
+import ResponseLayout from './ResponseLayout';
 import { useResource } from '../../context/ResourceContext';
 import { apiCall } from '../../utils/api';
+import { RequestDetails, ADMIN_API_BASE } from '../../types';
 
 interface Site {
   name: string;
@@ -29,22 +26,15 @@ interface Site {
 
 interface SiteListSitesDisplayProps {
   responseData: { sites: Site[] } | null;
-  requestDetails: {
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null;
+  requestDetails: RequestDetails | null;
   responseStatus: number;
 }
 
-const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({ 
+const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
   responseData,
   requestDetails,
   responseStatus,
 }) => {
-  const [showRaw, setShowRaw] = useState(false);
   const navigate = useNavigate();
   const { setSite, owner } = useResource();
 
@@ -65,19 +55,17 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
 
   const handleCopyConfig = async (siteName: string) => {
     try {
-      const details = {
-        url: `https://admin.hlx.page/config/${owner}/sites/${siteName}.json`,
+      const details: RequestDetails = {
+        url: `${ADMIN_API_BASE}/config/${owner}/sites/${siteName}.json`,
         method: 'GET',
         headers: {},
         queryParams: {},
         body: null
       };
-      
+
       const { responseData } = await apiCall(details);
       if (responseData) {
-        // Store the config in sessionStorage
         sessionStorage.setItem('copiedSiteConfig', JSON.stringify(responseData));
-        // Navigate to create page
         setSite('');
         navigate('/site-config/create');
       }
@@ -90,40 +78,16 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
   const sortedSites = [...sites].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <Box>
-      <RequestDisplay
-        requestDetails={requestDetails}
-      />
-
-      <Divider sx={{ my: 2 }} />
-
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">Response</Typography>
-        {sortedSites.length > 0 && (
-          <Box>
-            <ButtonGroup size="small">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(!showRaw)}
-                variant={showRaw ? 'contained' : 'outlined'}
-              >
-                {showRaw ? 'Show Formatted' : 'Show Raw'}
-              </Button>
-            </ButtonGroup>
-          </Box>
-        )}
-      </Box>
-
+    <ResponseLayout
+      requestDetails={requestDetails}
+      responseData={responseData}
+      responseStatus={responseStatus}
+      showToggle={sortedSites.length > 0}
+    >
       {sortedSites.length === 0 ? (
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
           No sites found for this organization.
         </Typography>
-      ) : showRaw ? (
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify({ ...responseData, sites: sortedSites }, null, 2)}
-          </pre>
-        </Paper>
       ) : (
         <TableContainer component={Paper} sx={{ mt: 2, border: 1, borderColor: 'grey.300' }}>
           <Table>
@@ -138,32 +102,16 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
               {sortedSites.map((site) => (
                 <TableRow key={site.name}>
                   <TableCell>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteConfig(site.name)}
-                      title="Delete Site Config"
-                    >
+                    <IconButton size="small" onClick={() => handleDeleteConfig(site.name)} title="Delete Site Config">
                       <DeleteIcon />
                     </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleViewConfig(site.name)}
-                      title="View Site Config"
-                    >
+                    <IconButton size="small" onClick={() => handleViewConfig(site.name)} title="View Site Config">
                       <VisibilityIcon />
                     </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditConfig(site.name)}
-                      title="Edit Site Config"
-                    >
+                    <IconButton size="small" onClick={() => handleEditConfig(site.name)} title="Edit Site Config">
                       <EditIcon />
                     </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleCopyConfig(site.name)}
-                      title="Copy Site Config"
-                    >
+                    <IconButton size="small" onClick={() => handleCopyConfig(site.name)} title="Copy Site Config">
                       <ContentCopyIcon />
                     </IconButton>
                   </TableCell>
@@ -175,8 +123,8 @@ const SiteListSitesDisplay: React.FC<SiteListSitesDisplayProps> = ({
           </Table>
         </TableContainer>
       )}
-    </Box>
+    </ResponseLayout>
   );
 };
 
-export default SiteListSitesDisplay; 
+export default SiteListSitesDisplay;

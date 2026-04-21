@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -15,28 +15,21 @@ import StatusResponseDisplay from '../components/response/StatusResponseDisplay'
 import Form, { useFormState } from '../components/Form';
 import JobPolling from 'components/JobPolling';
 import ResponseDisplay from '../components/response/ResponseDisplay';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const IndexReindex: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, jobLink, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, jobLink, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/index/${owner}/${repo}/${ref}/${path}`,
+      url: `${ADMIN_API_BASE}/index/${owner}/${site}/${ref}/${path}`,
       method: 'POST',
       headers: {},
       queryParams: {},
       body: {}
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -61,7 +54,7 @@ const IndexReindex: React.FC = () => {
             <ResourceInputs />
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/index/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`${ADMIN_API_BASE}/index/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
@@ -77,10 +70,7 @@ const IndexReindex: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

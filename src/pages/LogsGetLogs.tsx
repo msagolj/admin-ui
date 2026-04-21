@@ -17,17 +17,11 @@ import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import LogsDisplay from '../components/response/LogsDisplay';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const LogsGetLogs: React.FC = () => {
-  const { owner, repo, ref } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref } = useResource();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   // Time range selection
   const [useTimeRange, setUseTimeRange] = useState(false);
@@ -52,13 +46,12 @@ const LogsGetLogs: React.FC = () => {
     }
 
     const details = {
-      url: `https://admin.hlx.page/log/${owner}/${repo}/${ref}`,
+      url: `${ADMIN_API_BASE}/log/${owner}/${site}/${ref}`,
       method: 'GET',
       headers: {},
       queryParams,
       body: null,
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -124,7 +117,7 @@ const LogsGetLogs: React.FC = () => {
 
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/log/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}`}
+              url={`${ADMIN_API_BASE}/log/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}`}
             />
 
             <Button
@@ -141,10 +134,7 @@ const LogsGetLogs: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

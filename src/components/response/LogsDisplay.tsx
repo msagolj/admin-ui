@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -9,14 +8,13 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Button,
-  ButtonGroup,
-  Divider,
+  Paper,
   IconButton,
   Tooltip
 } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import RequestDisplay from '../RequestDisplay';
+import ResponseLayout from './ResponseLayout';
+import { RequestDetails } from '../../types';
 
 interface LogEntry {
   timestamp: number;
@@ -42,17 +40,9 @@ interface LogsDisplayProps {
     to: string;
     entries: LogEntry[];
     nextToken?: string;
-    links?: {
-      next: string;
-    };
+    links?: { next: string };
   } | null;
-  requestDetails: {
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null;
+  requestDetails: RequestDetails | null;
   responseStatus: number;
 }
 
@@ -61,47 +51,23 @@ const LogsDisplay: React.FC<LogsDisplayProps> = ({
   requestDetails,
   responseStatus,
 }) => {
-  const [showRaw, setShowRaw] = useState(false);
-
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
 
+  const entries = responseData?.entries || [];
+
   return (
-    <Box>
-      <RequestDisplay
-        requestDetails={requestDetails}
-      />
-
-      <Divider sx={{ my: 2 }} />
-
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        <Typography variant="h6">Response</Typography>
-        {responseData?.entries && responseData.entries.length > 0 && (
-          <Box>
-            <ButtonGroup size="small">
-              <Button
-                startIcon={<VisibilityIcon />}
-                onClick={() => setShowRaw(!showRaw)}
-                variant={showRaw ? 'contained' : 'outlined'}
-              >
-                {showRaw ? 'Show Formatted' : 'Show Raw'}
-              </Button>
-            </ButtonGroup>
-          </Box>
-        )}
-      </Box>
-
-      {!responseData?.entries || responseData.entries.length === 0 ? (
+    <ResponseLayout
+      requestDetails={requestDetails}
+      responseData={responseData}
+      responseStatus={responseStatus}
+      showToggle={entries.length > 0}
+    >
+      {entries.length === 0 ? (
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
           No logs found for the specified time range.
         </Typography>
-      ) : showRaw ? (
-        <Paper sx={{ p: 2, mt: 2 }}>
-          <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-            {JSON.stringify(responseData, null, 2)}
-          </pre>
-        </Paper>
       ) : (
         <TableContainer component={Paper} sx={{ mt: 2, border: 1, borderColor: 'grey.300' }}>
           <Table>
@@ -118,10 +84,10 @@ const LogsDisplay: React.FC<LogsDisplayProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {responseData.entries.map((entry, index) => (
+              {entries.map((entry, index) => (
                 <TableRow key={index}>
                   <TableCell>
-                    <Tooltip 
+                    <Tooltip
                       title={
                         <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
                           {JSON.stringify(entry, null, 2)}
@@ -155,8 +121,8 @@ const LogsDisplay: React.FC<LogsDisplayProps> = ({
           </Table>
         </TableContainer>
       )}
-    </Box>
+    </ResponseLayout>
   );
 };
 
-export default LogsDisplay; 
+export default LogsDisplay;

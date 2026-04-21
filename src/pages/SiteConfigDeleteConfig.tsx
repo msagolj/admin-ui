@@ -20,18 +20,12 @@ import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from '../components/response/ResponseDisplay';
 import SiteInputs from 'components/SiteInputs';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const SiteConfigDeleteConfig: React.FC = () => {
   const { owner, site } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: jsonError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,13 +36,12 @@ const SiteConfigDeleteConfig: React.FC = () => {
 
   const handleConfirmDelete = async () => {
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/sites/${site}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}.json`,
       method: 'DELETE',
       headers: {},
       queryParams: {},
       body: null
     };
-    setRequestDetails(details);
     executeSubmit(details);
     setOpenDialog(false);
   };
@@ -72,7 +65,7 @@ const SiteConfigDeleteConfig: React.FC = () => {
             <SiteInputs />
             <ApiUrlDisplay
               method="DELETE"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/sites/${site || '{site}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/sites/${site || '{site}'}.json`}
             />
             <Button
               variant="contained"
@@ -89,11 +82,7 @@ const SiteConfigDeleteConfig: React.FC = () => {
 
       <ErrorDisplay 
         error={error || jsonError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

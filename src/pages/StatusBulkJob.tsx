@@ -19,17 +19,11 @@ import PathSelector from '../components/PathSelector';
 import StatusResponseDisplay from '../components/response/StatusResponseDisplay';
 import JobPolling from '../components/JobPolling';
 import Form, { useFormState } from '../components/Form';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const StatusBulkJob: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, jobLink, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, jobLink, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   // additional parameters for the bulk status job
   const [paths, setPaths] = useState<string[]>(['']);
@@ -40,7 +34,7 @@ const StatusBulkJob: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/status/${owner}/${repo}/${ref}/*`,
+      url: `${ADMIN_API_BASE}/status/${owner}/${site}/${ref}/*`,
       method: 'POST',
       headers: {},
       queryParams: {},
@@ -51,7 +45,6 @@ const StatusBulkJob: React.FC = () => {
         forceAsync
       }
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -120,7 +113,7 @@ const StatusBulkJob: React.FC = () => {
             />
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/status/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/*`}
+              url={`${ADMIN_API_BASE}/status/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/*`}
             />
             <Button
               variant="contained"

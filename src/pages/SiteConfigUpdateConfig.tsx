@@ -18,21 +18,15 @@ import SiteInputs from 'components/SiteInputs';
 import JsonEditor from '../components/JsonEditor';
 import { apiCall } from 'utils/api';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const SiteConfigUpdateSiteConfig: React.FC = () => {
   const { owner, site } = useResource();
   const [migrate, setMigrate] = useState(false);
   const [validate, setValidate] = useState(false);
   const [config, setConfig] = useState<any>({});
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: jsonError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
   const jsonEditorRef = useRef<any>(null);
 
   // Fetch current config when component mounts or owner/site changes
@@ -40,7 +34,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
     const fetchConfig = async () => {
       if (owner && site) {
         const details = {
-          url: `https://admin.hlx.page/config/${owner}/sites/${site}.json`,
+          url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}.json`,
           method: 'GET',
           headers: {},
           queryParams: {},
@@ -75,7 +69,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
     const latestConfig = jsonEditorRef.current?.getLatestValue() || config;
 
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/sites/${site}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}.json`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -83,7 +77,6 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
       queryParams,
       body: latestConfig
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -131,7 +124,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
             )}
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/sites/${site || '{site}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/sites/${site || '{site}'}.json`}
             />
             <Button
               variant="contained"
@@ -147,11 +140,7 @@ const SiteConfigUpdateSiteConfig: React.FC = () => {
 
       <ErrorDisplay 
         error={error || jsonError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

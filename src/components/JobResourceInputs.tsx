@@ -4,57 +4,48 @@ import { useResource } from '../context/ResourceContext';
 
 interface JobResourceInputsProps {
   defaultOwner?: string;
-  defaultRepo?: string;
+  defaultSite?: string;
   defaultRef?: string;
   defaultTopic?: string;
   readOnlyOwner?: boolean;
-  readOnlyRepo?: boolean;
+  readOnlySite?: boolean;
   readOnlyRef?: boolean;
   readOnlyTopic?: boolean;
 }
 
 const JobResourceInputs: React.FC<JobResourceInputsProps> = ({
   defaultOwner = '',
-  defaultRepo = '',
+  defaultSite = '',
   defaultRef = '',
   defaultTopic = '',
   readOnlyOwner = false,
-  readOnlyRepo = false,
+  readOnlySite = false,
   readOnlyRef = false,
   readOnlyTopic = false,
 }) => {
-  const { 
-    owner, setOwner, 
-    repo, setRepo, 
-    ref, setRef, 
+  const {
+    owner, setOwner,
+    site, setSite,
+    ref, setRef,
     topic, setTopic,
     ownerHistory,
-    repoHistory,
+    siteHistory,
     refHistory,
     topicHistory
   } = useResource();
 
-  // Set default values when component mounts
   React.useEffect(() => {
-    if (defaultOwner) {
-      setOwner(defaultOwner);
-    }
-    if (defaultRepo) {
-      setRepo(defaultRepo);
-    }
-    if (defaultRef) {
-      setRef(defaultRef);
-    }
-    if (defaultTopic) {
-      setTopic(defaultTopic);
-    }
-  }, [defaultOwner, defaultRepo, defaultRef, defaultTopic]);
+    if (defaultOwner) setOwner(defaultOwner);
+    if (defaultSite) setSite(defaultSite);
+    if (defaultRef) setRef(defaultRef);
+    if (defaultTopic) setTopic(defaultTopic);
+  }, [defaultOwner, defaultSite, defaultRef, defaultTopic]);
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
+    <Box sx={{
+      display: 'flex',
       flexDirection: { xs: 'column', md: 'row' },
-      gap: 2 
+      gap: 2
     }}>
       <Box sx={{ flex: 1 }}>
         <Autocomplete
@@ -66,11 +57,11 @@ const JobResourceInputs: React.FC<JobResourceInputsProps> = ({
             <TextField
               {...params}
               fullWidth
-              label="Owner"
+              label="Organization"
               required
               onChange={(e) => setOwner(e.target.value)}
-              placeholder="Repository owner"
-              helperText="Repository owner (e.g., organization or user name)"
+              placeholder="Organization name"
+              helperText="Organization or GitHub owner"
               InputProps={{ ...params.InputProps, readOnly: readOnlyOwner }}
             />
           )}
@@ -80,19 +71,19 @@ const JobResourceInputs: React.FC<JobResourceInputsProps> = ({
       <Box sx={{ flex: 1 }}>
         <Autocomplete
           freeSolo
-          options={repoHistory}
-          value={repo}
-          onChange={(_, newValue) => setRepo(newValue || '')}
+          options={siteHistory}
+          value={site}
+          onChange={(_, newValue) => setSite(newValue || '')}
           renderInput={(params) => (
             <TextField
               {...params}
               fullWidth
-              label="Repository"
+              label="Site"
               required
-              onChange={(e) => setRepo(e.target.value)}
-              placeholder="Repository name"
-              helperText="Name of the repository"
-              InputProps={{ ...params.InputProps, readOnly: readOnlyRepo }}
+              onChange={(e) => setSite(e.target.value)}
+              placeholder="Site name"
+              helperText="Site (repository) name"
+              InputProps={{ ...params.InputProps, readOnly: readOnlySite }}
             />
           )}
         />
@@ -112,7 +103,7 @@ const JobResourceInputs: React.FC<JobResourceInputsProps> = ({
               required
               onChange={(e) => setRef(e.target.value)}
               placeholder="Branch or ref"
-              helperText="Ref (branch) of repository"
+              helperText="Branch reference (e.g., main)"
               InputProps={{ ...params.InputProps, readOnly: readOnlyRef }}
             />
           )}
@@ -143,4 +134,4 @@ const JobResourceInputs: React.FC<JobResourceInputsProps> = ({
   );
 };
 
-export default JobResourceInputs; 
+export default JobResourceInputs;

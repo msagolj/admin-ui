@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -14,6 +14,7 @@ import Form, { useFormState } from '../components/Form';
 import ProfileListProfilesDisplay from '../components/response/ProfileListProfilesDisplay';
 import SiteInputs from '../components/SiteInputs';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 interface Profile {
   name: string;
@@ -21,26 +22,18 @@ interface Profile {
 
 const ProfileConfigListProfiles: React.FC = () => {
   const { owner } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: jsonError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/profiles.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/profiles.json`,
       method: 'GET',
       headers: {},
       queryParams: {},
       body: null
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -61,7 +54,7 @@ const ProfileConfigListProfiles: React.FC = () => {
              />
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/config/${owner || '{org}'}/profiles.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{org}'}/profiles.json`}
             />
             <Button
               variant="contained"
@@ -77,10 +70,7 @@ const ProfileConfigListProfiles: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

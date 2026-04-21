@@ -15,19 +15,13 @@ import ProfileInputs from '../components/ProfileInputs';
 import JsonEditor from '../components/JsonEditor';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import TuneIcon from '@mui/icons-material/Tune';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const ProfileConfigCreateProfile: React.FC = () => {
   const { owner, profile } = useResource();
   const [config, setConfig] = useState<any>();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: jsonError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
 
   // Check for copied config when component mounts
   useEffect(() => {
@@ -60,7 +54,7 @@ const ProfileConfigCreateProfile: React.FC = () => {
     }
 
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/profiles/${profile}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/profiles/${profile}.json`,
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -68,7 +62,6 @@ const ProfileConfigCreateProfile: React.FC = () => {
       queryParams: {},
       body: parsedConfig
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -95,7 +88,7 @@ const ProfileConfigCreateProfile: React.FC = () => {
             />
             <ApiUrlDisplay
               method="PUT"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/profiles/${profile || '{profile}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/profiles/${profile || '{profile}'}.json`}
             />
             <Button
               variant="contained"
@@ -111,11 +104,7 @@ const ProfileConfigCreateProfile: React.FC = () => {
 
       <ErrorDisplay 
         error={error || jsonError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

@@ -3,8 +3,11 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/Layout';
+import ErrorBoundary from './components/ErrorBoundary';
 import { ResourceProvider } from './context/ResourceContext';
 import { AuthProvider } from './context/AuthContext';
+import { ResponseCacheProvider } from './context/ResponseCacheContext';
+import { SnackbarProvider } from './context/SnackbarContext';
 import StatusGeneralStatus from './pages/StatusGeneralStatus';
 import StatusBulkJob from './pages/StatusBulkJob';
 import StatusIndex from './pages/IndexStatus';
@@ -14,6 +17,7 @@ import OrgConfigReadConfig from './pages/OrgConfigReadConfig';
 import OrgConfigListUsers from './pages/OrgConfigListUsers';
 import SiteConfigListConfig from './pages/SiteConfigListSites';
 import SiteConfigReadConfig from './pages/SiteConfigReadConfig';
+import SiteConfigReadAggregatedConfig from './pages/SiteConfigReadAggregatedConfig';
 import SiteConfigUpdateSiteConfig from './pages/SiteConfigUpdateConfig';
 import SiteConfigCreateConfig from './pages/SiteConfigCreateConfig';
 import SiteConfigDeleteConfig from './pages/SiteConfigDeleteConfig';
@@ -65,7 +69,10 @@ const App: React.FC = () => {
       <AuthProvider>
         <ResourceProvider>
           <Router>
+            <SnackbarProvider>
+            <ResponseCacheProvider>
             <Layout>
+              <ErrorBoundary>
               <Routes>
                 <Route path="/" element={<Navigate to="/status/general" replace />} />
                 <Route path="/status/general" element={<StatusGeneralStatus />} />
@@ -77,6 +84,7 @@ const App: React.FC = () => {
                 <Route path="/org-config/users" element={<OrgConfigListUsers />} />
                 <Route path="/site-config/list" element={<SiteConfigListConfig />} />
                 <Route path="/site-config/read" element={<SiteConfigReadConfig />} />
+                <Route path="/site-config/read-aggregated" element={<SiteConfigReadAggregatedConfig />} />
                 <Route path="/site-config/create" element={<SiteConfigCreateConfig />} />
                 <Route path="/site-config/update" element={<SiteConfigUpdateSiteConfig />} />
                 <Route path="/site-config/delete" element={<SiteConfigDeleteConfig />} />
@@ -109,7 +117,10 @@ const App: React.FC = () => {
                 <Route path="/jobs/stop" element={<JobStop />} />
                 <Route path="/sitemap/generate" element={<SitemapGenerate />} />
               </Routes>
+              </ErrorBoundary>
             </Layout>
+            </ResponseCacheProvider>
+            </SnackbarProvider>
           </Router>
         </ResourceProvider>
       </AuthProvider>

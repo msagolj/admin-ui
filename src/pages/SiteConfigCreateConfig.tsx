@@ -15,6 +15,7 @@ import SiteInputs from 'components/SiteInputs';
 import JsonEditor from '../components/JsonEditor';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import WebIcon from '@mui/icons-material/Web';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const SiteConfigCreateConfig: React.FC = () => {
   const { owner, site } = useResource();
@@ -23,15 +24,8 @@ const SiteConfigCreateConfig: React.FC = () => {
     code: {},
     access: {}
   });
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: jsonError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
 
   // Check for copied config when component mounts
   useEffect(() => {
@@ -64,7 +58,7 @@ const SiteConfigCreateConfig: React.FC = () => {
     }
 
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/sites/${site}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}.json`,
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -72,7 +66,6 @@ const SiteConfigCreateConfig: React.FC = () => {
       queryParams: {},
       body: parsedConfig
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -99,7 +92,7 @@ const SiteConfigCreateConfig: React.FC = () => {
             />
             <ApiUrlDisplay
               method="PUT"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/sites/${site || '{site}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/sites/${site || '{site}'}.json`}
             />
             <Button
               variant="contained"
@@ -115,11 +108,7 @@ const SiteConfigCreateConfig: React.FC = () => {
 
       <ErrorDisplay 
         error={error || jsonError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

@@ -1,70 +1,43 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
-  Typography,
-  Divider,
-  Button,
-  ButtonGroup,
   IconButton,
   Tooltip,
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { useNavigate, useLocation } from 'react-router-dom';
-import RequestDisplay from '../RequestDisplay';
+import ResponseLayout from './ResponseLayout';
+import { RequestDetails } from '../../types';
 
 const RobotsDisplay: React.FC<{
-  requestDetails: any;
+  requestDetails: RequestDetails | null;
   responseData: string;
   responseStatus: number;
-}> = (props) => {
-  const { requestDetails, responseData, responseStatus } = props;
-  const [showRaw, setShowRaw] = useState(false);
+}> = ({ requestDetails, responseData, responseStatus }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleEdit = () => {
-    navigate('/site-config/update-robots-txt');
-  };
+  const handleEdit = () => navigate('/site-config/update-robots-txt');
 
   const formatRobotsTxt = (content: string): React.ReactNode => {
     if (!content) return null;
 
     const lines = content.split('\n');
     return (
-      <Box sx={{ 
+      <Box sx={{
         fontFamily: 'monospace',
         whiteSpace: 'pre-wrap',
         wordBreak: 'break-word',
-        '& .directive': {
-          color: '#2196f3', // blue
-          fontWeight: 'bold',
-        },
-        '& .comment': {
-          color: '#757575', // grey
-          fontStyle: 'italic',
-        },
-        '& .value': {
-          color: '#4caf50', // green
-        },
+        '& .directive': { color: '#2196f3', fontWeight: 'bold' },
+        '& .comment': { color: '#757575', fontStyle: 'italic' },
+        '& .value': { color: '#4caf50' },
       }}>
         {lines.map((line, index) => {
-          // Skip empty lines
-          if (!line.trim()) {
-            return <br key={index} />;
-          }
-
-          // Handle comments
+          if (!line.trim()) return <br key={index} />;
           if (line.trim().startsWith('#')) {
-            return (
-              <div key={index} className="comment">
-                {line}
-              </div>
-            );
+            return <div key={index} className="comment">{line}</div>;
           }
-
-          // Handle directives
           const parts = line.split(':');
           if (parts.length >= 2) {
             const directive = parts[0].trim();
@@ -76,70 +49,32 @@ const RobotsDisplay: React.FC<{
               </div>
             );
           }
-
-          // Handle other lines
           return <div key={index}>{line}</div>;
         })}
       </Box>
     );
   };
 
-  return (
-    <Box>
-      <RequestDisplay
-        requestDetails={requestDetails}
-      />
-
-      <Divider sx={{ my: 2 }} />
-
-      <Box sx={{ mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="h6">Response</Typography>
-          <ButtonGroup size="small">
-            <Button
-              startIcon={<VisibilityIcon />}
-              onClick={() => setShowRaw(!showRaw)}
-              variant={showRaw ? 'contained' : 'outlined'}
-            >
-              {showRaw ? 'Show Formatted' : 'Show Raw'}
-            </Button>
-          </ButtonGroup>
-        </Box>
-        {location.pathname === '/site-config/read-robots-txt' && (
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Edit Robots.txt">
-              <IconButton onClick={handleEdit} size="small">
-                <EditIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
-      </Box>
-
-      <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
-        <Box sx={{ mb: 2 }}>
-          {showRaw ? (
-            <Box
-              component="pre"
-              sx={{
-                fontFamily: 'monospace',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-                m: 0,
-                p: 2,
-                bgcolor: 'grey.100',
-                borderRadius: 1,
-              }}
-            >
-              {responseData}
-            </Box>
-          ) : (
-            formatRobotsTxt(responseData)
-          )}
-        </Box>
-      </Paper>
+  const toolbar = location.pathname === '/site-config/read-robots-txt' ? (
+    <Box sx={{ display: 'flex', gap: 1 }}>
+      <Tooltip title="Edit Robots.txt">
+        <IconButton onClick={handleEdit} size="small"><EditIcon /></IconButton>
+      </Tooltip>
     </Box>
+  ) : undefined;
+
+  return (
+    <ResponseLayout
+      requestDetails={requestDetails}
+      responseData={responseData}
+      responseStatus={responseStatus}
+      toolbar={toolbar}
+    >
+      <Paper sx={{ p: 3, mb: 3, border: 1, borderColor: 'grey.300' }}>
+        {formatRobotsTxt(responseData)}
+      </Paper>
+    </ResponseLayout>
   );
 };
 
-export default RobotsDisplay; 
+export default RobotsDisplay;

@@ -22,6 +22,7 @@ import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from '../components/response/ResponseDisplay';
 import SiteInputs from '../components/SiteInputs';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const AVAILABLE_ROLES = [
   'admin',
@@ -39,15 +40,8 @@ const SiteConfigCreateAPIKey: React.FC = () => {
   const [description, setDescription] = useState('');
   const [roles, setRoles] = useState<string[]>([]);
   const [jwt, setJwt] = useState('');
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: formError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
 
   const handleRoleChange = (event: SelectChangeEvent<typeof roles>) => {
     const value = event.target.value;
@@ -81,7 +75,7 @@ const SiteConfigCreateAPIKey: React.FC = () => {
     }
 
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/sites/${site}/apiKeys.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/sites/${site}/apiKeys.json`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -89,7 +83,6 @@ const SiteConfigCreateAPIKey: React.FC = () => {
       queryParams: {},
       body: requestBody
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -158,7 +151,7 @@ const SiteConfigCreateAPIKey: React.FC = () => {
 
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/sites/${site || '{site}'}/apiKeys.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/sites/${site || '{site}'}/apiKeys.json`}
             />
             
             <Button
@@ -175,11 +168,7 @@ const SiteConfigCreateAPIKey: React.FC = () => {
 
       <ErrorDisplay 
         error={error || formError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

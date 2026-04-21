@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -13,28 +13,21 @@ import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import ProfileReadDisplay from '../components/response/ProfileReadDisplay';
 import ProfileInputs from '../components/ProfileInputs';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const ProfileConfigReadProfile: React.FC = () => {
   const { owner, profile } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/profiles/${profile}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/profiles/${profile}.json`,
       method: 'GET',
       headers: {},
       queryParams: {},
       body: null
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -53,7 +46,7 @@ const ProfileConfigReadProfile: React.FC = () => {
             <ProfileInputs />
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/profiles/${profile || '{profile}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/profiles/${profile || '{profile}'}.json`}
             />
             <Button
               variant="contained"
@@ -69,10 +62,7 @@ const ProfileConfigReadProfile: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

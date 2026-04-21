@@ -4,11 +4,11 @@ import { useResource } from '../context/ResourceContext';
 
 interface ResourceInputsProps {
   defaultOwner?: string;
-  defaultRepo?: string;
+  defaultSite?: string;
   defaultRef?: string;
   defaultPath?: string;
   readOnlyOwner?: boolean;
-  readOnlyRepo?: boolean;
+  readOnlySite?: boolean;
   readOnlyRef?: boolean;
   readOnlyPath?: boolean;
   hidePath?: boolean;
@@ -16,47 +16,38 @@ interface ResourceInputsProps {
 
 const ResourceInputs: React.FC<ResourceInputsProps> = ({
   defaultOwner = '',
-  defaultRepo = '',
+  defaultSite = '',
   defaultRef = '',
   defaultPath = '',
   readOnlyOwner = false,
-  readOnlyRepo = false,
+  readOnlySite = false,
   readOnlyRef = false,
   readOnlyPath = false,
   hidePath = false,
 }) => {
-  const { 
-    owner, setOwner, 
-    repo, setRepo, 
-    ref, setRef, 
+  const {
+    owner, setOwner,
+    site, setSite,
+    ref, setRef,
     path, setPath,
     ownerHistory,
-    repoHistory,
+    siteHistory,
     refHistory,
     pathHistory
   } = useResource();
 
-  // Set default values when component mounts
   React.useEffect(() => {
-    if (defaultOwner) {
-      setOwner(defaultOwner);
-    }
-    if (defaultRepo) {
-      setRepo(defaultRepo);
-    }
-    if (defaultRef) {
-      setRef(defaultRef);
-    }
-    if (defaultPath) {
-      setPath(defaultPath);
-    }
-  }, [defaultOwner, defaultRepo, defaultRef, defaultPath]);
+    if (defaultOwner) setOwner(defaultOwner);
+    if (defaultSite) setSite(defaultSite);
+    if (defaultRef) setRef(defaultRef);
+    if (defaultPath) setPath(defaultPath);
+  }, [defaultOwner, defaultSite, defaultRef, defaultPath]);
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
+    <Box sx={{
+      display: 'flex',
       flexDirection: { xs: 'column', md: 'row' },
-      gap: 2 
+      gap: 2
     }}>
       <Box sx={{ flex: 1 }}>
         <Autocomplete
@@ -68,11 +59,11 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
             <TextField
               {...params}
               fullWidth
-              label="Owner"
+              label="Organization"
               required
               onChange={(e) => setOwner(e.target.value)}
-              placeholder="Repository owner"
-              helperText="Repository owner (e.g., organization or user name)"
+              placeholder="Organization name"
+              helperText="Organization or GitHub owner"
               InputProps={{ ...params.InputProps, readOnly: readOnlyOwner }}
             />
           )}
@@ -82,19 +73,19 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
       <Box sx={{ flex: 1 }}>
         <Autocomplete
           freeSolo
-          options={repoHistory}
-          value={repo}
-          onChange={(_, newValue) => setRepo(newValue || '')}
+          options={siteHistory}
+          value={site}
+          onChange={(_, newValue) => setSite(newValue || '')}
           renderInput={(params) => (
             <TextField
               {...params}
               fullWidth
-              label="Repository"
+              label="Site"
               required
-              onChange={(e) => setRepo(e.target.value)}
-              placeholder="Repository name"
-              helperText="Name of the repository"
-              InputProps={{ ...params.InputProps, readOnly: readOnlyRepo }}
+              onChange={(e) => setSite(e.target.value)}
+              placeholder="Site name"
+              helperText="Site (repository) name"
+              InputProps={{ ...params.InputProps, readOnly: readOnlySite }}
             />
           )}
         />
@@ -114,7 +105,7 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
               required
               onChange={(e) => setRef(e.target.value)}
               placeholder="Branch or ref"
-              helperText="Ref (branch) of repository"
+              helperText="Branch reference (e.g., main)"
               InputProps={{ ...params.InputProps, readOnly: readOnlyRef }}
             />
           )}
@@ -147,4 +138,4 @@ const ResourceInputs: React.FC<ResourceInputsProps> = ({
   );
 };
 
-export default ResourceInputs; 
+export default ResourceInputs;

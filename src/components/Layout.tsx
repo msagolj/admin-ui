@@ -17,7 +17,6 @@ import {
   Tooltip,
   Chip,
   Button,
-  MenuItem,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -34,7 +33,6 @@ import BusinessIcon from '@mui/icons-material/Business';
 import WebIcon from '@mui/icons-material/Web';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TuneIcon from '@mui/icons-material/Tune';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import TokenInputModal from './TokenInputModal';
@@ -158,6 +156,7 @@ const menuGroups: MenuGroup[] = [
         subItems: [
           { text: 'List Sites', path: '/site-config/list', method: 'GET' },
           { text: 'Read Site Config', path: '/site-config/read', method: 'GET' },
+          { text: 'Read Aggregated Site Config', path: '/site-config/read-aggregated', method: 'GET' },
           { text: 'Update Site Config', path: '/site-config/update', method: 'POST' },
           { text: 'Create Site Config', path: '/site-config/create', method: 'PUT' },
           { text: 'Delete Site Config', path: '/site-config/delete', method: 'DELETE' },
@@ -191,7 +190,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-  const { handleTokenSubmit: submitToken } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -211,11 +210,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const handleTokenModalClose = () => {
     setShowTokenModal(false);
-  };
-
-  const handleTokenSubmit = (token: string, aemToken: string) => {
-    submitToken(token, aemToken);
-    handleTokenModalClose();
   };
 
   const isActivePath = (path?: string) => {
@@ -441,14 +435,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               AEM Admin API Dashboard
             </Typography>
           </Box>
-          <Button
-            color="inherit"
-            startIcon={<SettingsIcon />}
-            onClick={handleSettingsClick}
-            sx={{ ml: 2 }}
-          >
-            Settings
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{
+              width: 8, height: 8, borderRadius: '50%',
+              bgcolor: isAuthenticated ? 'success.light' : 'warning.light',
+            }} />
+            <Button
+              color="inherit"
+              startIcon={<SettingsIcon />}
+              onClick={handleSettingsClick}
+            >
+              Settings
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Box
@@ -515,7 +514,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <TokenInputModal
         open={showTokenModal}
         onClose={handleTokenModalClose}
-        onSubmit={handleTokenSubmit}
       />
     </Box>
   );

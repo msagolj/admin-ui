@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Paper,
@@ -14,27 +14,20 @@ import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
 import ResponseDisplay from '../components/response/ResponseDisplay';
 import SiteInputs from 'components/SiteInputs';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 const OrgConfigReadConfig: React.FC = () => {
   const { owner, setOwner } = useResource();
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/config/${owner}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}.json`,
       method: 'GET',
       headers: {},
       queryParams: {},
       body: null
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -55,7 +48,7 @@ const OrgConfigReadConfig: React.FC = () => {
              />
             <ApiUrlDisplay
               method="GET"
-              url={`https://admin.hlx.page/config/${owner || '{org}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{org}'}.json`}
             />
             <Button
               variant="contained"
@@ -71,10 +64,7 @@ const OrgConfigReadConfig: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

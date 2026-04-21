@@ -18,17 +18,11 @@ import PathSelector from '../components/PathSelector';
 import StatusResponseDisplay from '../components/response/StatusResponseDisplay';
 import JobPolling from '../components/JobPolling';
 import Form, { useFormState } from '../components/Form';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const PreviewBulkJob: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, jobLink, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, jobLink, error, loading, executeSubmit, reset, requestDetails } = useFormState();
 
   // additional parameters for the bulk preview job
   const [paths, setPaths] = useState<string[]>(['']);
@@ -42,7 +36,7 @@ const PreviewBulkJob: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const details = {
-      url: `https://admin.hlx.page/preview/${owner}/${repo}/${ref}/*`,
+      url: `${ADMIN_API_BASE}/preview/${owner}/${site}/${ref}/*`,
       method: 'POST',
       headers: {},
       queryParams: {},
@@ -56,7 +50,6 @@ const PreviewBulkJob: React.FC = () => {
         'hlx-html2md-version': html2mdVersion || undefined
       }
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -139,7 +132,7 @@ const PreviewBulkJob: React.FC = () => {
             />
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/preview/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/*`}
+              url={`${ADMIN_API_BASE}/preview/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/*`}
             />
             <Button
               variant="contained"
@@ -155,10 +148,7 @@ const PreviewBulkJob: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 

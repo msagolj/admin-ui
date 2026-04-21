@@ -16,19 +16,13 @@ import ProfileInputs from '../components/ProfileInputs';
 import JsonEditor from '../components/JsonEditor';
 import { apiCall } from '../utils/api';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const ProfileConfigUpdateProfile: React.FC = () => {
   const { owner, profile } = useResource();
   const [config, setConfig] = useState<any>({});
-  const { status, responseData, error, loading, executeSubmit, reset } = useFormState();
+  const { status, responseData, error, loading, executeSubmit, reset, requestDetails } = useFormState();
   const { error: jsonError, handleError, clearError } = useErrorHandler();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
   const jsonEditorRef = useRef<any>(null);
 
   // Fetch current config when component mounts or owner/profile changes
@@ -36,7 +30,7 @@ const ProfileConfigUpdateProfile: React.FC = () => {
     const fetchConfig = async () => {
       if (owner && profile) {
         const details = {
-          url: `https://admin.hlx.page/config/${owner}/profiles/${profile}.json`,
+          url: `${ADMIN_API_BASE}/config/${owner}/profiles/${profile}.json`,
           method: 'GET',
           headers: {},
           queryParams: {},
@@ -64,7 +58,7 @@ const ProfileConfigUpdateProfile: React.FC = () => {
     const latestConfig = jsonEditorRef.current?.getLatestValue() || config;
 
     const details = {
-      url: `https://admin.hlx.page/config/${owner}/profiles/${profile}.json`,
+      url: `${ADMIN_API_BASE}/config/${owner}/profiles/${profile}.json`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -72,7 +66,6 @@ const ProfileConfigUpdateProfile: React.FC = () => {
       queryParams: {},
       body: latestConfig
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -100,7 +93,7 @@ const ProfileConfigUpdateProfile: React.FC = () => {
             />
             <ApiUrlDisplay
               method="POST"
-              url={`https://admin.hlx.page/config/${owner || '{owner}'}/profiles/${profile || '{profile}'}.json`}
+              url={`${ADMIN_API_BASE}/config/${owner || '{owner}'}/profiles/${profile || '{profile}'}.json`}
             />
             <Button
               variant="contained"
@@ -116,11 +109,7 @@ const ProfileConfigUpdateProfile: React.FC = () => {
 
       <ErrorDisplay 
         error={error || jsonError} 
-        onDismiss={() => {
-          reset();
-          clearError();
-          setRequestDetails(null);
-        }}
+        onDismiss={() => { reset(); clearError(); }}
         requestDetails={requestDetails}
       />
 

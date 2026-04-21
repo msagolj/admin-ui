@@ -12,30 +12,30 @@ import ResourceInputs from '../components/ResourceInputs';
 import ErrorDisplay from '../components/ErrorDisplay';
 import PageHeader from '../components/PageHeader';
 import Form, { useFormState } from '../components/Form';
+import ConfirmDialog from '../components/ConfirmDialog';
 import ResponseDisplay from '../components/response/ResponseDisplay';
 import JobPolling from 'components/JobPolling';
+import { RequestDetails, ADMIN_API_BASE } from '../types';
 
 const IndexRemoveResource: React.FC = () => {
-  const { owner, repo, ref, path } = useResource();
-  const { status, responseData, jobLink, error, loading, executeSubmit, reset } = useFormState();
-  const [requestDetails, setRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const { owner, site, ref, path } = useResource();
+  const { status, responseData, jobLink, error, loading, executeSubmit, reset, requestDetails } = useFormState();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    setConfirmOpen(false);
     const details = {
-      url: `https://admin.hlx.page/index/${owner}/${repo}/${ref}/${path}`,
+      url: `${ADMIN_API_BASE}/index/${owner}/${site}/${ref}/${path}`,
       method: 'DELETE',
       headers: {},
       queryParams: {},
       body: {}
     };
-    setRequestDetails(details);
     executeSubmit(details);
   };
 
@@ -58,7 +58,7 @@ const IndexRemoveResource: React.FC = () => {
             <ResourceInputs />
             <ApiUrlDisplay
               method="DELETE"
-              url={`https://admin.hlx.page/index/${owner || '{owner}'}/${repo || '{repo}'}/${ref || '{ref}'}/${path || '{path}'}`}
+              url={`${ADMIN_API_BASE}/index/${owner || '{owner}'}/${site || '{site}'}/${ref || '{ref}'}/${path || '{path}'}`}
             />
             <Button
               variant="contained"
@@ -75,10 +75,7 @@ const IndexRemoveResource: React.FC = () => {
 
       <ErrorDisplay 
         error={error} 
-        onDismiss={() => {
-          reset();
-          setRequestDetails(null);
-        }}
+        onDismiss={reset}
         requestDetails={requestDetails}
       />
 
@@ -93,6 +90,15 @@ const IndexRemoveResource: React.FC = () => {
       {jobLink && (
         <JobPolling jobLink={jobLink} />
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm Remove from Index"
+        message="Are you sure you want to proceed? This action cannot be undone."
+        confirmLabel="Remove from Index"
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </Box>
   );
 };

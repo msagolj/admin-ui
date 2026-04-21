@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -10,6 +10,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { apiCall } from '../utils/api';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import ResponseDisplay from './response/ResponseDisplay';
+import { RequestDetails } from '../types';
 
 interface JobPollingProps {
   jobLink: string | null;
@@ -17,32 +18,58 @@ interface JobPollingProps {
 }
 
 const JobPolling: React.FC<JobPollingProps> = ({ jobLink, onJobComplete }) => {
-  const [pollingRequestDetails, setPollingRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
-  const [jobResultsRequestDetails, setJobResultsRequestDetails] = useState<{
-    url: string;
-    method: string;
-    headers: Record<string, string>;
-    queryParams: Record<string, string>;
-    body: any;
-  } | null>(null);
+  const [pollingRequestDetails, setPollingRequestDetails] = useState<RequestDetails | null>(null);
+  const [jobResultsRequestDetails, setJobResultsRequestDetails] = useState<RequestDetails | null>(null);
   const [pollingResponse, setPollingResponse] = useState<any>(null);
   const [pollingStatus, setPollingStatus] = useState<number | null>(null);
   const [jobResults, setJobResults] = useState<any>(null);
   const [jobResultsStatus, setJobResultsStatus] = useState<number | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [pollingCount, setPollingCount] = useState(0);
   const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const pollingCountRef = useRef<number>(0);
   const { error, handleError, clearError } = useErrorHandler();
 
-  // Start polling when jobLink changes
+  const makePollingApiCall = useCallback(async (details: RequestDetails) => {
+    try {
+      const { status, responseData } = await apiCall(details);
+      setPollingStatus(status);
+      setPollingResponse(responseData);
+      setPollingCount(prev => prev + 1);
+
+      if (responseData?.state !== 'stopped' && pollingCount < 60) {
+        pollingTimeoutRef.current = setTimeout(() => {
+          makePollingApiCall(details);
+        }, 1000);
+      } else {
+        setIsPolling(false);
+        if (responseData?.state === 'stopped' && responseData?.links?.details) {
+          fetchJobResults(responseData.links.details);
+        }
+      }
+    } catch (err) {
+      handleError(err, 'Job Status Polling');
+      setIsPolling(false);
+    }
+  }, [pollingCount, handleError]);
+
+  const pollJobStatus = useCallback(() => {
+    if (!jobLink) return;
+    setIsPolling(true);
+    const details: RequestDetails = {
+      url: jobLink,
+      method: 'GET',
+      headers: {},
+      queryParams: {},
+      body: null
+    };
+    setPollingRequestDetails(details);
+    makePollingApiCall(details);
+  }, [jobLink, makePollingApiCall]);
+
   useEffect(() => {
     if (jobLink) {
+      setPollingCount(0);
+      setIsPolling(false);
       pollJobStatus();
     }
     return () => {
@@ -52,84 +79,37 @@ const JobPolling: React.FC<JobPollingProps> = ({ jobLink, onJobComplete }) => {
     };
   }, [jobLink]);
 
-  const pollJobStatus = () => {
-    if (!jobLink) return;
-    setIsPolling(true);
-    const details = {
-      url: jobLink,
-      method: 'GET',
-      headers: {},
-      queryParams: {},
-      body: null
-    };
-    setPollingRequestDetails(details);
-    makePollingApiCall(details);
-  };
-
-  const makePollingApiCall = async (pollingRequestDetails: any) => {
-    try {
-      if (!pollingRequestDetails) return;
-      const {status, responseData} = await apiCall(pollingRequestDetails);
-      setPollingStatus(status);
-      setPollingResponse(responseData);
-      
-      // Increment polling count
-      pollingCountRef.current += 1;
-      
-      // If job is not stopped and we haven't reached max polls, keep polling
-      if (responseData?.state !== 'stopped' && pollingCountRef.current < 60) {
-        pollingTimeoutRef.current = setTimeout(pollJobStatus, 1000); // Poll every 1 second
-      } else {
-        setIsPolling(false);
-        // If job is stopped, fetch the results
-        if (responseData?.state === 'stopped' && responseData?.links?.details) {
-          fetchJobResults(responseData.links.details);
-        }
-      }
-    } catch (err) {
-      handleError(err, 'Job Status Polling');
-      setIsPolling(false);
-    }
-  };
-
   const fetchJobResults = (detailsUrl: string) => {
-    setJobResultsRequestDetails({
+    const details: RequestDetails = {
       url: detailsUrl,
       method: 'GET',
       headers: {},
       queryParams: {},
       body: null
-    });
+    };
+    setJobResultsRequestDetails(details);
   };
 
   useEffect(() => {
     if (jobResultsRequestDetails) {
-      makeJobResultsApiCall();
+      const makeCall = async () => {
+        try {
+          const { status, responseData } = await apiCall(jobResultsRequestDetails);
+          setJobResultsStatus(status);
+          setJobResults(responseData);
+          if (onJobComplete) {
+            onJobComplete(responseData);
+          }
+        } catch (err) {
+          handleError(err, 'Fetching Job Results');
+        }
+      };
+      makeCall();
     }
   }, [jobResultsRequestDetails]);
 
-  const makeJobResultsApiCall = async () => {
-    try {
-      if (!jobResultsRequestDetails) return;
-      const {status, responseData} = await apiCall(jobResultsRequestDetails);
-      setJobResultsStatus(status);
-      setJobResults(responseData);
-      if (onJobComplete) {
-        onJobComplete(responseData);
-      }
-    } catch (err) {
-      handleError(err, 'Fetching Job Results');
-    }
-  };
-
-  // Reset polling count and state when job link changes
-  useEffect(() => {
-    pollingCountRef.current = 0;
-    setIsPolling(false);
-  }, [jobLink]);
-
   const handleContinuePolling = () => {
-    pollingCountRef.current = 0;
+    setPollingCount(0);
     pollJobStatus();
   };
 
@@ -146,11 +126,11 @@ const JobPolling: React.FC<JobPollingProps> = ({ jobLink, onJobComplete }) => {
                 <>
                   <CircularProgress size={20} />
                   <Typography variant="body2" color="text.secondary">
-                    (Poll {pollingCountRef.current}/60)
+                    (Poll {pollingCount}/60)
                   </Typography>
                 </>
               )}
-              {!isPolling && pollingCountRef.current >= 60 && (
+              {!isPolling && pollingCount >= 60 && (
                 <Button
                   variant="outlined"
                   size="small"
@@ -186,4 +166,4 @@ const JobPolling: React.FC<JobPollingProps> = ({ jobLink, onJobComplete }) => {
   );
 };
 
-export default JobPolling; 
+export default JobPolling;
